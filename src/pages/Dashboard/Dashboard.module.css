@@ -1,0 +1,318 @@
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Sekcja podsumowania */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.summaryCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summaryCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.summaryTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px 0;
+}
+
+.summaryValue {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.summaryNote {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 4px 0 0 0;
+  font-style: italic;
+}
+
+.income {
+  color: var(--color-success);
+}
+
+.expense {
+  color: var(--color-danger);
+}
+
+.balance {
+  color: var(--color-primary);
+}
+
+/* Sekcja kont */
+.accountsSection {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.accountsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.accountCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  border-left: 4px solid var(--color-primary);
+}
+
+.accountCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.accountExcluded {
+  border-left-color: var(--color-text-secondary);
+  opacity: 0.85;
+}
+
+/* Kolory kont */
+.accountColorBlue {
+  border-left-color: #4a6da7;
+}
+
+.accountColorGreen {
+  border-left-color: #28a745;
+}
+
+.accountColorRed {
+  border-left-color: #dc3545;
+}
+
+.accountColorPurple {
+  border-left-color: #6f42c1;
+}
+
+.accountColorOrange {
+  border-left-color: #fd7e14;
+}
+
+.accountColorTeal {
+  border-left-color: #20c997;
+}
+
+.accountColorPink {
+  border-left-color: #e83e8c;
+}
+
+.accountColorYellow {
+  border-left-color: #ffc107;
+}
+
+.accountName {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.accountBalance {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.accountDetails {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+
+.accountType {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.accountExcludedNote {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 4px 0 0 0;
+  font-style: italic;
+}
+
+/* Sekcja kategorii budżetu */
+.budgetSection {
+  margin-bottom: 32px;
+}
+
+.budgetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.categoryCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.categoryCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.categoryCardOverBudget {
+  border: 1px solid var(--color-error);
+  box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.2);
+}
+
+.categoryName {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.budgetAlert {
+  display: inline-flex;
+  margin-left: 8px;
+}
+
+.alertIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-error);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.categoryBudget {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 4px 0;
+}
+
+.categorySpent {
+  font-size: 14px;
+  color: var(--color-danger);
+  margin: 0 0 8px 0;
+}
+
+.progressWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.progressContainer {
+  flex: 1;
+  height: 8px;
+  background-color: var(--color-background-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progressPercentage {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+
+.percentageOverBudget {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.overBudgetAlert {
+  color: var(--color-error);
+  font-weight: 600;
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  background-color: rgba(220, 53, 69, 0.1);
+  padding: 6px 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.progressNormal {
+  background-color: var(--color-primary);
+}
+
+.progressWarning {
+  background-color: var(--color-warning);
+}
+
+.progressDanger {
+  background-color: var(--color-error);
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+  .summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .accountsGrid, .budgetGrid {
+    grid-template-columns: 1fr;
+  }
+}

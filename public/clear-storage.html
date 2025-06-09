@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Czyszczenie localStorage</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f8fafc;
+      color: #334155;
+    }
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 0;
+      color: #4a6da7;
+    }
+    button {
+      background-color: #4a6da7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin: 1rem 0;
+    }
+    button:hover {
+      background-color: #3a5a8f;
+    }
+    .status {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      background-color: #e6f4ea;
+      color: #1e7e34;
+      display: block;
+    }
+    .error {
+      background-color: #fce8e8;
+      color: #dc3545;
+      display: block;
+    }
+    .storage-info {
+      margin-top: 1.5rem;
+      text-align: left;
+      background-color: #f1f5f9;
+      padding: 1rem;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .storage-item {
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .storage-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .back-link {
+      margin-top: 1.5rem;
+      color: #4a6da7;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Czyszczenie danych aplikacji</h1>
+    <p>Kliknij przycisk poniżej, aby usunąć wszystkie dane aplikacji z localStorage i rozpocząć testowanie od nowa.</p>
+    
+    <button id="clearButton">Wyczyść dane aplikacji</button>
+    <button id="showStorageButton">Pokaż zawartość localStorage</button>
+    
+    <div id="status" class="status"></div>
+    
+    <div id="storageInfo" class="storage-info" style="display: none;"></div>
+    
+    <a href="/" class="back-link">Wróć do aplikacji</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const clearButton = document.getElementById('clearButton');
+      const showStorageButton = document.getElementById('showStorageButton');
+      const statusDiv = document.getElementById('status');
+      const storageInfoDiv = document.getElementById('storageInfo');
+      
+      // Klucze używane w aplikacji
+      const appKeys = ['transactions', 'budget', 'accounts', 'categories'];
+      
+      // Funkcja do wyświetlania zawartości localStorage
+      function displayLocalStorage() {
+        storageInfoDiv.innerHTML = '';
+        storageInfoDiv.style.display = 'block';
+        
+        if (localStorage.length === 0) {
+          storageInfoDiv.innerHTML = '<p>localStorage jest pusty.</p>';
+          return;
+        }
+        
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          let value = localStorage.getItem(key);
+          
+          // Próba sformatowania JSON dla lepszej czytelności
+          try {
+            const parsedValue = JSON.parse(value);
+            value = JSON.stringify(parsedValue, null, 2);
+          } catch (e) {
+            // Jeśli nie jest to poprawny JSON, pozostaw jako tekst
+          }
+          
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'storage-item';
+          
+          const keyElement = document.createElement('strong');
+          keyElement.textContent = key;
+          
+          const valuePreview = value.length > 100 ? value.substring(0, 100) + '...' : value;
+          
+          itemDiv.appendChild(keyElement);
+          itemDiv.appendChild(document.createTextNode(': '));
+          itemDiv.appendChild(document.createTextNode(valuePreview));
+          
+          storageInfoDiv.appendChild(itemDiv);
+        }
+      }
+      
+      // Obsługa przycisku do czyszczenia localStorage
+      clearButton.addEventListener('click', function() {
+        try {
+          // Usuwanie tylko kluczy używanych przez aplikację
+          appKeys.forEach(key => {
+            localStorage.removeItem(key);
+          });
+          
+          statusDiv.textContent = 'Dane aplikacji zostały pomyślnie usunięte. Możesz teraz wrócić do aplikacji i rozpocząć testowanie od nowa.';
+          statusDiv.className = 'status success';
+          
+          // Aktualizacja wyświetlania localStorage, jeśli jest otwarte
+          if (storageInfoDiv.style.display === 'block') {
+            displayLocalStorage();
+          }
+        } catch (error) {
+          statusDiv.textContent = 'Wystąpił błąd podczas usuwania danych: ' + error.message;
+          statusDiv.className = 'status error';
+        }
+      });
+      
+      // Obsługa przycisku do wyświetlania zawartości localStorage
+      showStorageButton.addEventListener('click', function() {
+        if (storageInfoDiv.style.display === 'none') {
+          displayLocalStorage();
+        } else {
+          storageInfoDiv.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

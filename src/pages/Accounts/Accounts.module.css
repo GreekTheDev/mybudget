@@ -1,0 +1,430 @@
+.accountsPage {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.addButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.accountsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.accountsSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: var(--spacing-md) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.accountsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+.accountCard {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg);
+  transition: box-shadow var(--transition-fast);
+  position: relative;
+  border-left: 4px solid var(--color-primary);
+}
+
+.accountCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Kolory kont */
+.accountColorBlue {
+  border-left-color: #4a6da7;
+}
+
+.accountColorGreen {
+  border-left-color: #28a745;
+}
+
+.accountColorRed {
+  border-left-color: #dc3545;
+}
+
+.accountColorPurple {
+  border-left-color: #6f42c1;
+}
+
+.accountColorOrange {
+  border-left-color: #fd7e14;
+}
+
+.accountColorTeal {
+  border-left-color: #20c997;
+}
+
+.accountColorPink {
+  border-left-color: #e83e8c;
+}
+
+.accountColorYellow {
+  border-left-color: #ffc107;
+}
+
+.accountHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.accountName {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-text);
+}
+
+.accountBalance {
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  color: var(--color-primary);
+  margin: var(--spacing-md) 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kebab menu styles */
+.kebabMenuContainer {
+  position: relative;
+}
+
+.kebabMenuButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color var(--transition-fast);
+}
+
+.kebabMenuButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.kebabDot {
+  width: 4px;
+  height: 4px;
+  background-color: var(--color-text-light);
+  border-radius: 50%;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: 120px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: none;
+  border: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.menuItem:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.deleteMenuItem {
+  color: var(--color-error);
+}
+
+.deleteMenuItem:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  color: var(--color-text-light);
+}
+
+.emptyStateIcon {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.emptyStateText {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Dialog styles */
+.dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.dialogContent {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 500px;
+  padding: var(--spacing-xl);
+}
+
+.dialogTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text);
+}
+
+.formGroup {
+  margin-bottom: var(--spacing-md);
+}
+
+.label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text);
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  transition: border-color var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.2);
+}
+
+.select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  background-color: white;
+  transition: border-color var(--transition-fast);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.2);
+}
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.checkboxLabel {
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.accountBudgetStatus {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: var(--spacing-xs);
+  font-style: italic;
+}
+
+/* Selektor kolorów */
+.colorSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.colorOption {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.colorOption:hover {
+  transform: scale(1.1);
+}
+
+.colorOptionSelected {
+  border-color: var(--color-text);
+  transform: scale(1.1);
+}
+
+/* Kolory dla opcji */
+.colorOption.accountColorBlue {
+  background-color: #4a6da7;
+}
+
+.colorOption.accountColorGreen {
+  background-color: #28a745;
+}
+
+.colorOption.accountColorRed {
+  background-color: #dc3545;
+}
+
+.colorOption.accountColorPurple {
+  background-color: #6f42c1;
+}
+
+.colorOption.accountColorOrange {
+  background-color: #fd7e14;
+}
+
+.colorOption.accountColorTeal {
+  background-color: #20c997;
+}
+
+.colorOption.accountColorPink {
+  background-color: #e83e8c;
+}
+
+.colorOption.accountColorYellow {
+  background-color: #ffc107;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.cancelButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.cancelButton:hover {
+  background-color: #f1f5f9;
+}
+
+.submitButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.submitButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Usunięcie strzałek w polach typu number */
+.input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

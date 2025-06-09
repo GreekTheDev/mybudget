@@ -1,0 +1,93 @@
+.transactionList {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing-xl);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.transactionList th,
+.transactionList td {
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.transactionList th {
+  background-color: var(--color-primary-light);
+  color: white;
+  font-weight: 500;
+}
+
+.transactionList tr:last-child td {
+  border-bottom: none;
+}
+
+.transactionList tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.income {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.expense {
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+.transfer {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editButton {
+  color: var(--color-primary);
+}
+
+.deleteButton {
+  color: var(--color-error);
+}
+
+.actionButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-light);
+}
+
+@media (max-width: 768px) {
+  .transactionList {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .transactionList th,
+  .transactionList td {
+    white-space: nowrap;
+  }
+}

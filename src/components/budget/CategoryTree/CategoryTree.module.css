@@ -1,0 +1,178 @@
+.categoryTree {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.loading, .error, .emptyMessage {
+  padding: var(--spacing-md);
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.error {
+  color: var(--color-error);
+  background-color: #fee2e2;
+  border-radius: var(--radius-sm);
+}
+
+.categoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.categoryItem {
+  margin-bottom: var(--spacing-sm);
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.categoryHeader:hover {
+  background-color: #f1f5f9;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  padding: 0;
+  margin-right: var(--spacing-sm);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.categoryName {
+  flex: 1;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.addButton {
+  background-color: transparent;
+  border: 1px solid var(--color-primary-light);
+  color: var(--color-primary);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  transition: all var(--transition-fast);
+}
+
+.addButton:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.subcategoryList {
+  list-style: none;
+  padding-left: var(--spacing-xl);
+  margin: var(--spacing-xs) 0;
+}
+
+.subcategoryItem {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.subcategoryItem:hover {
+  background-color: #f8fafc;
+}
+
+.subcategoryName {
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+}
+
+.emptySubcategories {
+  color: var(--color-text-light);
+  font-style: italic;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.addSubcategoryForm {
+  margin: var(--spacing-sm) 0;
+  padding: var(--spacing-sm);
+  background-color: #f8fafc;
+  border-radius: var(--radius-sm);
+  margin-left: var(--spacing-xl);
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-primary-light);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.2);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.saveButton, .cancelButton {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.saveButton {
+  background-color: var(--color-primary);
+  border: none;
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.cancelButton {
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  color: var(--color-text-light);
+}
+
+.cancelButton:hover {
+  background-color: #f1f5f9;
+}

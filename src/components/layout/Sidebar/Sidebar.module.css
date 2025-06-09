@@ -1,0 +1,246 @@
+.sidebar {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  transition: all var(--transition-normal) ease;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.collapsed {
+  width: 70px;
+}
+
+.collapsedToggle {
+  margin: var(--spacing-md) auto var(--spacing-sm);
+  font-size: var(--font-size-xl);
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.collapsed .sidebarHeader {
+  justify-content: center;
+}
+
+.logoIcon {
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.logoText {
+  transition: opacity var(--transition-normal) ease;
+}
+
+.toggleButton {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--color-primary);
+  transition: color var(--transition-fast) ease;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggleButton:hover {
+  opacity: 0.8;
+}
+
+.nav {
+  flex: 1;
+  padding: var(--spacing-md) 0;
+  overflow-y: auto;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navItem {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Usunięto, ponieważ teraz używamy osobnego kontenera dla ustawień */
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: all var(--transition-fast) ease;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  color: var(--color-primary);
+  background-color: rgba(74, 109, 167, 0.05);
+}
+
+.navLinkActive {
+  color: var(--color-primary);
+  background-color: rgba(74, 109, 167, 0.1);
+  border-left: 3px solid var(--color-primary);
+}
+
+.collapsed .navLinkActive {
+  border-left: none;
+  border-right: 3px solid var(--color-primary);
+}
+
+.navIcon {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapsed .navLink {
+  justify-content: center;
+  padding: var(--spacing-md) 0;
+}
+
+.navLabel {
+  transition: opacity var(--transition-normal) ease;
+}
+
+/* Usunięto style dla mobileMenuButton i overlay, ponieważ nie są już potrzebne */
+
+/* Bottom Navigation dla wersji mobilnej */
+.bottomNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  z-index: 90;
+  height: 60px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.bottomNavList {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.bottomNavItem {
+  flex: 1;
+  height: 100%;
+}
+
+.bottomNavLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-light);
+  transition: all var(--transition-fast) ease;
+  position: relative;
+}
+
+.bottomNavLink:hover {
+  color: var(--color-primary);
+}
+
+.bottomNavIcon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottomNavLinkActive {
+  color: var(--color-primary);
+}
+
+.bottomNavLinkActive::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+}
+
+/* Specjalny styl dla przycisku "Dodaj transakcję" */
+.bottomNavItem:nth-child(3) .bottomNavLink {
+  margin-top: -20px;
+}
+
+.bottomNavItem:nth-child(3) .bottomNavIcon {
+  background-color: var(--color-primary);
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  font-size: 28px;
+}
+
+/* Kontener dla elementu ustawień */
+.settingsContainer {
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  /* Sidebar jest ukryty na urządzeniach mobilnych */
+  .sidebar {
+    display: none;
+  }
+  
+  /* Bottom navigation jest widoczna na urządzeniach mobilnych */
+  .bottomNav {
+    display: block;
+  }
+}
