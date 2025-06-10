@@ -1,4 +1,4 @@
-import { BudgetTemplate } from '../components/budget/BudgetTemplateSelector/BudgetTemplateSelector';
+import type { BudgetTemplate } from '../components/budget/BudgetTemplateSelector/BudgetTemplateSelector';
 
 export const budgetTemplates: BudgetTemplate[] = [
   {

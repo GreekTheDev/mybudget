@@ -1,54 +1,80 @@
-# React + TypeScript + Vite
+# MyBudget - Aplikacja do zarządzania budżetem osobistym
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikacja MyBudget to nowoczesne narzędzie do zarządzania budżetem osobistym, stworzone przy użyciu React, TypeScript i Vite.
 
-Currently, two official plugins are available:
+## Technologie
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19
+- TypeScript
+- Vite 6
+- CSS Modules
+- React Router
 
-## Expanding the ESLint configuration
+## Uruchamianie lokalnie
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Sklonuj repozytorium
+2. Zainstaluj zależności:
+   ```
+   npm install
+   ```
+3. Uruchom aplikację w trybie deweloperskim:
+   ```
+   npm run dev
+   ```
+4. Zbuduj aplikację:
+   ```
+   npm run build
+   ```
+5. Uruchom zbudowaną aplikację:
+   ```
+   npm run preview
+   ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Wdrażanie na AWS Amplify
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Konfiguracja AWS Amplify
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Zaloguj się do konsoli AWS i przejdź do usługi AWS Amplify
+2. Kliknij "Nowa aplikacja" > "Host web app"
+3. Wybierz swoje repozytorium kodu (GitHub, GitLab, Bitbucket)
+4. Wybierz repozytorium i gałąź, którą chcesz wdrożyć
+5. Skonfiguruj ustawienia budowania:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+   - Build settings:
+     ```yaml
+     version: 1
+     frontend:
+       phases:
+         preBuild:
+           commands:
+             - npm install
+         build:
+           commands:
+             - npm run build
+       artifacts:
+         baseDirectory: dist
+         files:
+           - '**/*'
+       cache:
+         paths:
+           - node_modules/**/*
+     ```
+
+6. Kliknij "Zapisz i wdróż"
+
+### Rozwiązywanie problemów z wdrażaniem
+
+Jeśli napotkasz problemy z wdrażaniem:
+
+1. Sprawdź logi budowania w konsoli AWS Amplify
+2. Upewnij się, że plik `amplify.yml` jest poprawnie skonfigurowany
+3. Sprawdź, czy wszystkie zależności są poprawnie zainstalowane
+4. Upewnij się, że proces budowania kończy się sukcesem lokalnie
+
+### Ważne pliki konfiguracyjne
+
+- `amplify.yml` - konfiguracja AWS Amplify
+- `buildspec.yml` - konfiguracja AWS CodeBuild
+- `vite.config.ts` - konfiguracja Vite
+- `.gitignore` - pliki ignorowane przez Git
 ```
