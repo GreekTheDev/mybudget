@@ -86,6 +86,8 @@ src/
 - Naprawiono błędy w plikach konfiguracyjnych JSON:
   - W pliku `amplify-config.json` usunięto zduplikowane obiekty JSON
   - W pliku `package.json` dodano brakujący przecinek po polu `"type": "module"`
+  - Usunięto nieprawidłowy plik `package.json` z katalogu nadrzędnego, który zawierał zduplikowane obiekty JSON
+- Dodano pakiet `@types/node` do zależności deweloperskich, aby umożliwić korzystanie z modułów Node.js (np. `path`) w konfiguracji TypeScript
 
 ## Konwencje kodowania
 
