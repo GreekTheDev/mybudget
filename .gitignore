@@ -65,6 +65,44 @@ amplify/backend/function/*/stacks
 amplify/backend/storage/*/build
 amplify/backend/storage/*/stacks
 
+# Amplify
+amplify/.config/local-*
+amplify/mock-data
+amplify/backend/amplify-meta.json
+amplify/backend/awscloudformation
+amplify/backend/.temp
+amplify/team-provider-info.json
+amplify/backend/api/*/build
+amplify/backend/api/*/resolvers
+amplify/backend/api/*/stacks
+amplify/backend/auth/*/build
+amplify/backend/auth/*/stacks
+amplify/backend/function/*/build
+amplify/backend/function/*/src/node_modules
+amplify/backend/function/*/dist
+amplify/backend/function/*/stacks
+amplify/backend/storage/*/build
+amplify/backend/storage/*/stacks
+
+# Amplify
+amplify/.config/local-*
+amplify/mock-data
+amplify/backend/amplify-meta.json
+amplify/backend/awscloudformation
+amplify/backend/.temp
+amplify/team-provider-info.json
+amplify/backend/api/*/build
+amplify/backend/api/*/resolvers
+amplify/backend/api/*/stacks
+amplify/backend/auth/*/build
+amplify/backend/auth/*/stacks
+amplify/backend/function/*/build
+amplify/backend/function/*/src/node_modules
+amplify/backend/function/*/dist
+amplify/backend/function/*/stacks
+amplify/backend/storage/*/build
+amplify/backend/storage/*/stacks
+
 # Temporary files
 .temp
 .tmp
