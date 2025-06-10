@@ -1,0 +1,13 @@
+{
+  "appId": "d2purvmhxhkfc4",
+  "branch": "main",
+  "buildType": "WEB_COMPUTE",
+  "framework": "React",
+  "nodeVersion": "20",
+  "packageManager": "npm",
+  "buildCommand": "npm run build",
+  "startCommand": "npm run dev",
+  "distDir": "dist",
+  "srcDir": "src",
+  "environmentVariables": {}
+}
