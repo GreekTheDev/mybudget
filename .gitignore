@@ -57,6 +57,5 @@ ehthumbs.db
 Desktop.ini
 
 # Package manager lock files (uncomment if you want to ignore them)
-# package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
