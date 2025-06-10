@@ -83,6 +83,9 @@ src/
 - Konfiguracja CSS Modules z TypeScript wymaga dodatkowych deklaracji typów
 - Zarządzanie stanem aplikacji będzie wymagało przemyślanej struktury danych
 - Implementacja responsywnego interfejsu użytkownika wymaga dokładnego planowania
+- Naprawiono błędy w plikach konfiguracyjnych JSON:
+  - W pliku `amplify-config.json` usunięto zduplikowane obiekty JSON
+  - W pliku `package.json` dodano brakujący przecinek po polu `"type": "module"`
 
 ## Konwencje kodowania
 
