@@ -26,6 +26,7 @@ import { budgetTemplates } from '../../data/budgetTemplates';
 
 import BudgetSection from '../../components/budget/BudgetSection/BudgetSection';
 import BudgetTemplateSelector from '../../components/budget/BudgetTemplateSelector/BudgetTemplateSelector';
+import BudgetSummary from '../../components/budget/BudgetSummary/BudgetSummary';
 import { MdArrowBack, MdArrowForward } from "react-icons/md";
 import styles from './Budget.module.css';
 
@@ -419,6 +420,12 @@ const Budget = () => {
               Zmień szablon
             </button>
           </div>
+
+          {/* Kafelki podsumowujące budżet */}
+          <BudgetSummary 
+            budgetData={budgetData} 
+            formatAmount={formatAmount} 
+          />
 
           {error && (
             <div className={styles.error}>

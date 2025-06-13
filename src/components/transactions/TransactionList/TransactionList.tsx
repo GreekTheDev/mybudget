@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Transaction } from '../../../types/Transaction';
 import styles from './TransactionList.module.css';
 import TransactionModal from '../TransactionModal/TransactionModal';
+import { MdEdit, MdDelete } from 'react-icons/md';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -56,7 +57,7 @@ const TransactionList = ({ transactions, onEdit, onDelete }: TransactionListProp
             <th>Opis</th>
             <th>Kategoria</th>
             <th>Kwota</th>
-            <th>Akcje</th>
+            <th className={styles.actionsHeader}>Akcje</th>
           </tr>
         </thead>
         <tbody>
@@ -84,14 +85,14 @@ const TransactionList = ({ transactions, onEdit, onDelete }: TransactionListProp
                   onClick={() => handleEditClick(transaction)}
                   aria-label="Edytuj transakcję"
                 >
-                  ✏️
+                  <MdEdit size={18} />
                 </button>
                 <button 
                   className={`${styles.actionButton} ${styles.deleteButton}`}
                   onClick={() => onDelete(transaction.id)}
                   aria-label="Usuń transakcję"
                 >
-                  🗑️
+                  <MdDelete size={18} />
                 </button>
               </td>
             </tr>

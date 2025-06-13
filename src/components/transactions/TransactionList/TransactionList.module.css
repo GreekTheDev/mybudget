@@ -47,7 +47,11 @@
 .actions {
   display: flex;
   gap: var(--spacing-sm);
-  justify-content: flex-end;
+  justify-content: center;
+}
+
+.actionsHeader {
+  text-align: center !important;
 }
 
 .actionButton {

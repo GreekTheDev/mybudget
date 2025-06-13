@@ -36,7 +36,6 @@ const TransactionModal = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [amountFocused, setAmountFocused] = useState(false);
-  const [items, setItems] = useState<Array<{ account: string, amount: number, category: string }>>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
 
@@ -142,9 +141,7 @@ const TransactionModal = ({
       newErrors.amount = 'Kwota musi być większa od zera';
     }
 
-    if (!formData.description?.trim()) {
-      newErrors.description = 'Opis jest wymagany';
-    }
+    // Opis nie jest już wymagany
 
     // Dla transferów sprawdzamy konto docelowe zamiast kategorii
     if (formData.type === 'transfer') {
@@ -261,12 +258,6 @@ const TransactionModal = ({
     e.preventDefault();
     
     if (validateForm()) {
-      // Jeśli mamy dodatkowe pozycje, musimy je obsłużyć
-      if (items.length > 0) {
-        // Tutaj można by dodać logikę do obsługi wielu pozycji
-        // Na razie po prostu zapisujemy główną transakcję
-      }
-      
       // Dla transferów, używamy targetAccount jako kategorii
       if (formData.type === 'transfer') {
         const transferData = {
@@ -276,30 +267,17 @@ const TransactionModal = ({
         };
         onSave(transferData);
       } else {
-        onSave(formData);
+        // Dla wydatków i przychodów, jeśli nie ma opisu, dodajemy domyślny
+        const finalData = {
+          ...formData,
+          description: formData.description || (formData.type === 'income' ? 'Przychód' : 'Wydatek')
+        };
+        onSave(finalData);
       }
     }
   };
 
-  const addItem = () => {
-    if (formData.account && formData.amount > 0 && formData.category) {
-      // Znajdź nazwę konta na podstawie ID
-      const accountName = accounts.find(acc => acc.id === formData.account)?.name || formData.account;
-      
-      setItems([...items, {
-        account: accountName,
-        amount: formData.amount,
-        category: formData.category
-      }]);
-      
-      // Resetujemy pola formularza dla nowej pozycji
-      setFormData(prev => ({
-        ...prev,
-        amount: 0,
-        category: ''
-      }));
-    }
-  };
+  // Funkcja addItem została usunięta, ponieważ nie jest już potrzebna
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -351,12 +329,12 @@ const TransactionModal = ({
           </div>
 
           <div className={styles.formRow}>
-            <div className={styles.formColumn} style={{ width: '20%' }}>
-              <label className={styles.label} htmlFor="account">KONTO</label>
+            <div className={styles.formColumn} style={{ width: '45%' }}>
+              <label className={styles.label} htmlFor="account">Konto</label>
               <select
                 id="account"
                 name="account"
-                className={styles.select}
+                className={`${styles.select} ${styles.accountSelect}`}
                 value={formData.account}
                 onChange={handleChange}
               >
@@ -369,8 +347,8 @@ const TransactionModal = ({
               </select>
               {errors.account && <p className={styles.error}>{errors.account}</p>}
             </div>
-            <div className={styles.formColumn} style={{ width: '80%' }}>
-              <label className={styles.label} htmlFor="amount">KWOTA</label>
+            <div className={styles.formColumn} style={{ width: '55%' }}>
+              <label className={styles.label} htmlFor="amount">Kwota</label>
               <div className={styles.amountInputContainer}>
                 <input
                   type="number"
@@ -394,7 +372,7 @@ const TransactionModal = ({
             <div className={styles.formColumn} style={{ width: '100%' }}>
               {formData.type === 'transfer' ? (
                 <>
-                  <label className={styles.label} htmlFor="targetAccount">KONTO DOCELOWE</label>
+                  <label className={styles.label} htmlFor="targetAccount">Konto docelowe</label>
                   <select
                     id="targetAccount"
                     name="targetAccount"
@@ -417,7 +395,7 @@ const TransactionModal = ({
                 </>
               ) : (
                 <>
-                  <label className={styles.label} htmlFor="category">KATEGORIA</label>
+                  <label className={styles.label} htmlFor="category">Kategoria</label>
                   <select
                     id="category"
                     name="category"
@@ -448,26 +426,7 @@ const TransactionModal = ({
             </div>
           </div>
 
-          <button 
-            type="button" 
-            className={styles.addItemButton}
-            onClick={addItem}
-          >
-            + Dodaj pozycję
-          </button>
-
-          {items.length > 0 && (
-            <div className={styles.itemsList}>
-              <h3>Dodane pozycje:</h3>
-              <ul>
-                {items.map((item, index) => (
-                  <li key={index}>
-                    {item.account}: {item.amount} PLN - {item.category}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Przycisk "Dodaj pozycję" został usunięty */}
 
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="description">Opis</label>
@@ -479,33 +438,26 @@ const TransactionModal = ({
               value={formData.description}
               onChange={handleChange}
               maxLength={100}
+              placeholder="Dodaj opis transakcji"
             />
             {errors.description && <p className={styles.error}>{errors.description}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Data</label>
-            <div 
-              className={styles.dateDisplay}
-              onClick={() => {
-                const dateInput = document.createElement('input');
-                dateInput.type = 'date';
-                dateInput.value = formData.date;
-                dateInput.style.display = 'none';
-                document.body.appendChild(dateInput);
-                dateInput.click();
-                dateInput.addEventListener('change', (e) => {
-                  const target = e.target as HTMLInputElement;
-                  setFormData(prev => ({
-                    ...prev,
-                    date: target.value
-                  }));
-                  document.body.removeChild(dateInput);
-                });
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={formData.date}
+              onChange={(e) => {
+                setFormData(prev => ({
+                  ...prev,
+                  date: e.target.value
+                }));
               }}
-            >
-              {formatDate(formData.date)}
-            </div>
+              className={styles.input}
+            />
             {errors.date && <p className={styles.error}>{errors.date}</p>}
           </div>
 

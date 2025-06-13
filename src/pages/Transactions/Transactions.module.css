@@ -38,17 +38,35 @@
   background-color: var(--color-primary-dark);
 }
 
-.filters {
+.filtersContainer {
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
-  flex-wrap: wrap;
+}
+
+.filtersGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.filterRow {
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: flex-end;
 }
 
 .filterGroup {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Typ i Kategoria mają taką samą szerokość */
+.filterGroup:nth-child(1),
+.filterGroup:nth-child(2) {
+  width: 180px;
 }
 
 .filterLabel {
@@ -73,18 +91,46 @@
 }
 
 .clearFilters {
-  background: none;
-  border: none;
+  background-color: var(--color-background-light);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  align-self: flex-end;
+  transition: background-color var(--transition-fast);
+  margin-left: var(--spacing-md);
+}
+
+.clearFilters:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dateRangeButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  align-items: flex-end;
+  flex-grow: 1;
+}
+
+.dateRangeButton {
+  background-color: var(--color-surface);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   color: var(--color-primary);
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  padding: 0;
-  margin-left: auto;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
 }
 
-.clearFilters:hover {
-  text-decoration: underline;
+.dateRangeButton:hover {
+  background-color: var(--color-primary-light);
+  color: white;
 }
 
 .summary {
@@ -149,12 +195,22 @@
     gap: var(--spacing-md);
   }
   
-  .filters {
+  .filterRow {
     flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: stretch;
+  }
+  
+  .filterGroup {
+    width: 100%;
   }
   
   .summary {
     flex-direction: column;
     gap: var(--spacing-md);
+  }
+  
+  .dateRangeButtons {
+    justify-content: center;
   }
 }

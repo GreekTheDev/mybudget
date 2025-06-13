@@ -7,7 +7,7 @@ import {
   updateTransaction, 
   deleteTransaction 
 } from '../../services/transactionService';
-import { updateSpentAmounts } from '../../services/budgetService';
+import { updateSpentAmounts, getAllBudgetCategories } from '../../services/budgetService';
 import TransactionList from '../../components/transactions/TransactionList/TransactionList';
 import TransactionModal from '../../components/transactions/TransactionModal/TransactionModal';
 import styles from './Transactions.module.css';
@@ -20,6 +20,13 @@ const Transactions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(location.pathname === '/transactions/new');
+  const [categories, setCategories] = useState<Array<{
+    id: string;
+    name: string;
+    categoryId: string;
+    sectionName: string;
+    sectionId: string;
+  }>>([]);
   
   // Filtry
   const [filters, setFilters] = useState({
@@ -29,6 +36,51 @@ const Transactions = () => {
     dateTo: '',
     searchTerm: ''
   });
+  
+  // Predefiniowane okresy czasowe
+  const setDateRange = (days: number) => {
+    const today = new Date();
+    const fromDate = new Date();
+    fromDate.setDate(today.getDate() - days);
+    
+    setFilters(prev => ({
+      ...prev,
+      dateFrom: fromDate.toISOString().split('T')[0],
+      dateTo: today.toISOString().split('T')[0]
+    }));
+  };
+  
+  // Ustawienie zakresu dla bieżącego tygodnia
+  const setCurrentWeek = () => {
+    const today = new Date();
+    const currentDay = today.getDay() || 7; // Niedziela to 0, zmieniamy na 7
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay - 1));
+    
+    setFilters(prev => ({
+      ...prev,
+      dateFrom: monday.toISOString().split('T')[0],
+      dateTo: today.toISOString().split('T')[0]
+    }));
+  };
+  
+  // Ustawienie zakresu dla poprzedniego tygodnia
+  const setPreviousWeek = () => {
+    const today = new Date();
+    const currentDay = today.getDay() || 7; // Niedziela to 0, zmieniamy na 7
+    
+    const previousMonday = new Date(today);
+    previousMonday.setDate(today.getDate() - (currentDay - 1) - 7);
+    
+    const previousSunday = new Date(previousMonday);
+    previousSunday.setDate(previousMonday.getDate() + 6);
+    
+    setFilters(prev => ({
+      ...prev,
+      dateFrom: previousMonday.toISOString().split('T')[0],
+      dateTo: previousSunday.toISOString().split('T')[0]
+    }));
+  };
 
 
 
@@ -48,6 +100,16 @@ const Transactions = () => {
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+  
+  // Pobieranie kategorii z budżetu
+  const fetchCategories = useCallback(async () => {
+    try {
+      const categoriesData = await getAllBudgetCategories();
+      setCategories(categoriesData);
+    } catch (err) {
+      console.error('Błąd podczas pobierania kategorii:', err);
     }
   }, []);
 
@@ -119,7 +181,7 @@ const Transactions = () => {
     // Filtrowanie po kategorii
     if (filters.category) {
       filtered = filtered.filter(t => 
-        t.category.toLowerCase().includes(filters.category.toLowerCase())
+        t.category === filters.category
       );
     }
     
@@ -169,10 +231,11 @@ const Transactions = () => {
     });
   };
 
-  // Pobieranie transakcji przy pierwszym renderowaniu
+  // Pobieranie transakcji i kategorii przy pierwszym renderowaniu
   useEffect(() => {
     fetchTransactions();
-  }, [fetchTransactions]);
+    fetchCategories();
+  }, [fetchTransactions, fetchCategories]);
 
   // Aktualizacja filtrów
   useEffect(() => {
@@ -206,81 +269,132 @@ const Transactions = () => {
         </div>
       )}
 
-      <div className={styles.filters}>
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel} htmlFor="type">Typ:</label>
-          <select
-            id="type"
-            name="type"
-            className={styles.filterSelect}
-            value={filters.type}
-            onChange={handleFilterChange}
-          >
-            <option value="all">Wszystkie</option>
-            <option value="income">Przychody</option>
-            <option value="expense">Wydatki</option>
-            <option value="transfer">Transfery</option>
-          </select>
+      <div className={styles.filtersContainer}>
+        <div className={styles.filtersGrid}>
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel} htmlFor="type">Typ</label>
+              <select
+                id="type"
+                name="type"
+                className={styles.filterSelect}
+                value={filters.type}
+                onChange={handleFilterChange}
+              >
+                <option value="all">Wszystkie</option>
+                <option value="income">Przychody</option>
+                <option value="expense">Wydatki</option>
+                <option value="transfer">Transfery</option>
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel} htmlFor="category">Kategoria</label>
+              <select
+                id="category"
+                name="category"
+                className={styles.filterSelect}
+                value={filters.category}
+                onChange={handleFilterChange}
+              >
+                <option value="">Wszystkie kategorie</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.filterGroup} style={{ flexGrow: 1 }}>
+              <label className={styles.filterLabel} htmlFor="searchTerm">Opis</label>
+              <input
+                type="text"
+                id="searchTerm"
+                name="searchTerm"
+                className={styles.filterInput}
+                value={filters.searchTerm}
+                onChange={handleFilterChange}
+                placeholder="Szukaj w opisie lub kategorii"
+              />
+            </div>
+            
+            {(filters.type !== 'all' || filters.category || filters.dateFrom || filters.dateTo || filters.searchTerm) && (
+              <button 
+                className={styles.clearFilters}
+                onClick={handleClearFilters}
+              >
+                Wyczyść
+              </button>
+            )}
+          </div>
+          
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel} htmlFor="dateFrom">OD</label>
+              <input
+                type="date"
+                id="dateFrom"
+                name="dateFrom"
+                className={styles.filterInput}
+                value={filters.dateFrom}
+                onChange={handleFilterChange}
+              />
+            </div>
+            
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel} htmlFor="dateTo">DO</label>
+              <input
+                type="date"
+                id="dateTo"
+                name="dateTo"
+                className={styles.filterInput}
+                value={filters.dateTo}
+                onChange={handleFilterChange}
+              />
+            </div>
+            
+            <div className={styles.dateRangeButtons}>
+              <button 
+                className={styles.dateRangeButton} 
+                onClick={setCurrentWeek}
+              >
+                Ten tydzień
+              </button>
+              <button 
+                className={styles.dateRangeButton} 
+                onClick={setPreviousWeek}
+              >
+                Poprzedni tydzień
+              </button>
+              <button 
+                className={styles.dateRangeButton} 
+                onClick={() => setDateRange(30)}
+              >
+                30 dni
+              </button>
+              <button 
+                className={styles.dateRangeButton} 
+                onClick={() => setDateRange(60)}
+              >
+                60 dni
+              </button>
+              <button 
+                className={styles.dateRangeButton} 
+                onClick={() => setDateRange(90)}
+              >
+                90 dni
+              </button>
+              <button 
+                className={styles.dateRangeButton} 
+                onClick={() => setDateRange(180)}
+              >
+                180 dni
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel} htmlFor="category">Kategoria:</label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            className={styles.filterInput}
-            value={filters.category}
-            onChange={handleFilterChange}
-            placeholder="Filtruj po kategorii"
-          />
-        </div>
-
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel} htmlFor="dateFrom">Od:</label>
-          <input
-            type="date"
-            id="dateFrom"
-            name="dateFrom"
-            className={styles.filterInput}
-            value={filters.dateFrom}
-            onChange={handleFilterChange}
-          />
-        </div>
-
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel} htmlFor="dateTo">Do:</label>
-          <input
-            type="date"
-            id="dateTo"
-            name="dateTo"
-            className={styles.filterInput}
-            value={filters.dateTo}
-            onChange={handleFilterChange}
-          />
-        </div>
-
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel} htmlFor="searchTerm">Szukaj:</label>
-          <input
-            type="text"
-            id="searchTerm"
-            name="searchTerm"
-            className={styles.filterInput}
-            value={filters.searchTerm}
-            onChange={handleFilterChange}
-            placeholder="Szukaj w opisie lub kategorii"
-          />
-        </div>
-
-        {(filters.type !== 'all' || filters.category || filters.dateFrom || filters.dateTo || filters.searchTerm) && (
-          <button 
-            className={styles.clearFilters}
-            onClick={handleClearFilters}
-          >
-            Wyczyść filtry
-          </button>
-        )}
+      
       </div>
 
       {isLoading ? (
