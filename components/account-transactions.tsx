@@ -22,6 +22,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 
 interface AccountTransactionsProps {
   accountId?: string
@@ -30,6 +38,8 @@ interface AccountTransactionsProps {
 export function AccountTransactions({ accountId }: AccountTransactionsProps) {
   const { 
     transactions, 
+    accounts,
+    addTransaction,
     updateTransaction, 
     deleteTransaction, 
     getUniquePayees, 
@@ -38,6 +48,16 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
   
   const [isClient, setIsClient] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
+  const [showAddDialog, setShowAddDialog] = React.useState(false)
+  const [showNewRow, setShowNewRow] = React.useState(false)
+  const [newTransaction, setNewTransaction] = React.useState({
+    payee: "",
+    amount: "",
+    accountId: accountId || "",
+    date: new Date(),
+    category: "",
+    memo: ""
+  })
 
   React.useEffect(() => {
     setIsClient(true)
@@ -82,6 +102,56 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
     setEditingField(null)
   }
 
+  const handleAddNewTransaction = () => {
+    // For mobile, show dialog
+    if (window.innerWidth < 768) {
+      setShowAddDialog(true)
+    } else {
+      // For desktop, show new row
+      setShowNewRow(true)
+    }
+  }
+
+  const handleSaveNewTransaction = () => {
+    if (!newTransaction.payee || !newTransaction.amount) return
+
+    const amount = parseFloat(newTransaction.amount)
+    if (isNaN(amount)) return
+
+    const transaction = {
+      accountId: newTransaction.accountId,
+      date: newTransaction.date,
+      payee: newTransaction.payee,
+      category: newTransaction.category,
+      memo: newTransaction.memo,
+      income: amount > 0 ? amount : 0,
+      expense: amount < 0 ? Math.abs(amount) : 0,
+    }
+
+    addTransaction(transaction)
+    setShowNewRow(false)
+    setNewTransaction({
+      payee: "",
+      amount: "",
+      accountId: accountId || "",
+      date: new Date(),
+      category: "",
+      memo: ""
+    })
+  }
+
+  const handleCancelNewTransaction = () => {
+    setShowNewRow(false)
+    setNewTransaction({
+      payee: "",
+      amount: "",
+      accountId: accountId || "",
+      date: new Date(),
+      category: "",
+      memo: ""
+    })
+  }
+
   const isEditing = (transactionId: string, fieldName: string) => {
     return editingField === `${transactionId}-${fieldName}`
   }
@@ -89,9 +159,26 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground">
-        No transactions found
-      </div>
+      <React.Fragment>
+        <div className="flex items-center justify-center h-32 text-muted-foreground mb-4">
+          No transactions found
+        </div>
+        <div className="mt-4">
+          <Button 
+            variant="outline" 
+            onClick={handleAddNewTransaction}
+          >
+            Add Transaction
+          </Button>
+        </div>
+        
+        {/* Mobile Add Transaction Dialog */}
+        <AddTransactionDialog 
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          accountId={accountId}
+        />
+      </React.Fragment>
     )
   }
 
@@ -396,9 +483,108 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
               </TableRow>
             )
           })}
+          
+          {/* New Transaction Row for Desktop */}
+          {showNewRow && (
+            <TableRow className="bg-muted/20">
+              {/* Date */}
+              <TableCell className="w-[150px]">
+                <DatePicker
+                  date={newTransaction.date}
+                  onDateChange={(date) => {
+                    if (date) {
+                      setNewTransaction(prev => ({ ...prev, date }))
+                    }
+                  }}
+                  className="w-[140px]"
+                />
+              </TableCell>
+              
+              {/* Payee */}
+              <TableCell className="w-[200px]">
+                <Input
+                  value={newTransaction.payee}
+                  onChange={(e) => setNewTransaction(prev => ({ ...prev, payee: e.target.value }))}
+                  placeholder="Enter payee name"
+                  className="w-[190px]"
+                />
+              </TableCell>
+              
+              {/* Category */}
+              <TableCell className="w-[150px]">
+                <Input
+                  value={newTransaction.category}
+                  onChange={(e) => setNewTransaction(prev => ({ ...prev, category: e.target.value }))}
+                  placeholder="Enter category"
+                  className="w-[140px]"
+                />
+              </TableCell>
+              
+              {/* Memo */}
+              <TableCell className="w-auto">
+                <Input
+                  value={newTransaction.memo}
+                  onChange={(e) => setNewTransaction(prev => ({ ...prev, memo: e.target.value }))}
+                  placeholder="Enter memo"
+                  className="min-w-[150px]"
+                />
+              </TableCell>
+              
+              {/* Amount */}
+              <TableCell className="w-[120px] text-right">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newTransaction.amount}
+                  onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                  placeholder="0.00"
+                  className="w-[110px] ml-auto text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </TableCell>
+              
+              {/* Actions */}
+              <TableCell className="w-16">
+                <div className="flex gap-1">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleSaveNewTransaction}
+                    disabled={!newTransaction.payee || !newTransaction.amount}
+                  >
+                    Save
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={handleCancelNewTransaction}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+      
+      {/* Add Transaction Button */}
+      <div className="mt-4">
+        <Button 
+          variant="outline" 
+          onClick={handleAddNewTransaction}
+          disabled={showNewRow}
+        >
+          Add Transaction
+        </Button>
+      </div>
     </div>
+    
+    {/* Mobile Add Transaction Dialog */}
+    <AddTransactionDialog 
+      open={showAddDialog}
+      onOpenChange={setShowAddDialog}
+      accountId={accountId}
+    />
     </React.Fragment>
   )
 }

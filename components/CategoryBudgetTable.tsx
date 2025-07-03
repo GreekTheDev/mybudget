@@ -100,14 +100,22 @@ export function CategoryBudgetTable() {
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
-                  <span className="font-semibold text-sm">{group.name}</span>
+                  <span className="font-medium text-xs">{group.name}</span>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs text-muted-foreground">Available</div>
-                  <div className={`text-sm font-semibold ${
-                    calculateGroupTotals(group.id).available >= 0 ? "text-green-600" : "text-red-600"
-                  }`}>
-                    {formatCurrency(calculateGroupTotals(group.id).available)}
+                <div className="text-right space-y-1">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="text-center">
+                      <div className="text-muted-foreground">Assigned</div>
+                      <div className="font-medium">{formatCurrency(calculateGroupTotals(group.id).assigned)}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-muted-foreground">Available</div>
+                      <div className={`font-medium ${
+                        calculateGroupTotals(group.id).available >= 0 ? "text-green-600" : "text-red-600"
+                      }`}>
+                        {formatCurrency(calculateGroupTotals(group.id).available)}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -122,25 +130,19 @@ export function CategoryBudgetTable() {
                   
                   return (
                     <div key={budget.id} className="p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="font-medium text-sm">{budget.name}</div>
-                        <div className="text-right">
-                          <div className="text-xs text-muted-foreground">Available</div>
-                          <div className={`text-sm font-medium ${
-                            available >= 0 ? "text-green-600" : "text-red-600"
-                          }`}>
-                            {formatCurrency(available)}
+                      <div className="flex justify-between items-center">
+                        <div className="font-medium text-xs">{budget.name}</div>
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                          <div className="text-center">
+                            <div className="font-medium">{formatCurrency(budget.assignedAmount)}</div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-xs">
-                        <div>
-                          <div className="text-muted-foreground">Assigned</div>
-                          <div className="font-medium">{formatCurrency(budget.assignedAmount)}</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Activity</div>
-                          <div className="font-medium">{formatCurrency(activity)}</div>
+                          <div className="text-center">
+                            <div className={`font-medium ${
+                              available >= 0 ? "text-green-600" : "text-red-600"
+                            }`}>
+                              {formatCurrency(available)}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

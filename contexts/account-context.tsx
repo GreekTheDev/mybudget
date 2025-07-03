@@ -58,6 +58,11 @@ interface AccountContextType {
   getBudgetsByGroupId: (groupId: string) => CategoryBudget[]
   getUniquePayees: () => string[]
   getUniqueCategories: () => string[]
+  getTotalBalance: () => number
+  getTotalIncome: () => number
+  getTotalExpenses: () => number
+  getTotalBudgetAssigned: () => number
+  getAvailableToAssign: () => number
 }
 
 const AccountContext = React.createContext<AccountContextType | null>(null)
@@ -71,64 +76,8 @@ export function useAccounts() {
 }
 
 export function AccountProvider({ children }: { children: React.ReactNode }) {
-  const [accounts, setAccounts] = React.useState<Account[]>([
-    {
-      id: "1",
-      name: "Main Checking",
-      type: "checking",
-      subtype: "Checking account",
-      balance: 2450.00,
-      category: "Cash",
-    },
-    {
-      id: "2",
-      name: "Savings",
-      type: "savings",
-      subtype: "Savings account",
-      balance: 12350.00,
-      category: "Savings",
-    },
-    {
-      id: "3",
-      name: "Credit Card",
-      type: "credit-card",
-      subtype: "Credit card",
-      balance: -1230.00,
-      category: "Credit Cards",
-    },
-  ])
-  const [transactions, setTransactions] = React.useState<Transaction[]>([
-    {
-      id: "t1",
-      accountId: "1",
-      date: new Date("2024-07-01"),
-      payee: "Grocery Store",
-      category: "Groceries",
-      memo: "Weekly shopping",
-      expense: 120.50,
-      income: 0,
-    },
-    {
-      id: "t2",
-      accountId: "1",
-      date: new Date("2024-07-02"),
-      payee: "Salary",
-      category: "Income",
-      memo: "Monthly salary",
-      expense: 0,
-      income: 5000.00,
-    },
-    {
-      id: "t3",
-      accountId: "2",
-      date: new Date("2024-07-01"),
-      payee: "Transfer from Checking",
-      category: "Transfer",
-      memo: "Monthly savings",
-      expense: 0,
-      income: 500.00,
-    },
-  ])
+  const [accounts, setAccounts] = React.useState<Account[]>([])
+  const [transactions, setTransactions] = React.useState<Transaction[]>([])
 
   const [categoryGroups, setCategoryGroups] = React.useState<CategoryGroup[]>([
     { id: "bills", name: "Bills", isExpanded: false },
@@ -262,6 +211,33 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     return categoryBudgets.filter((budget) => budget.groupId === groupId)
   }, [categoryBudgets])
 
+  // Calculate total balance across all accounts
+  const getTotalBalance = React.useCallback(() => {
+    return accounts.reduce((total, account) => total + account.balance, 0)
+  }, [accounts])
+
+  // Calculate total income from all transactions
+  const getTotalIncome = React.useCallback(() => {
+    return transactions.reduce((total, transaction) => total + transaction.income, 0)
+  }, [transactions])
+
+  // Calculate total expenses from all transactions
+  const getTotalExpenses = React.useCallback(() => {
+    return transactions.reduce((total, transaction) => total + transaction.expense, 0)
+  }, [transactions])
+
+  // Calculate total budget assigned across all categories
+  const getTotalBudgetAssigned = React.useCallback(() => {
+    return categoryBudgets.reduce((total, budget) => total + budget.assignedAmount, 0)
+  }, [categoryBudgets])
+
+  // Calculate available money to assign (total balance - total assigned)
+  const getAvailableToAssign = React.useCallback(() => {
+    const totalBalance = getTotalBalance()
+    const totalAssigned = getTotalBudgetAssigned()
+    return totalBalance - totalAssigned
+  }, [getTotalBalance, getTotalBudgetAssigned])
+
   const value = React.useMemo(() => ({
     accounts,
     transactions,
@@ -284,6 +260,11 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     getBudgetsByGroupId,
     getUniquePayees,
     getUniqueCategories,
+    getTotalBalance,
+    getTotalIncome,
+    getTotalExpenses,
+    getTotalBudgetAssigned,
+    getAvailableToAssign,
   }), [
     accounts,
     transactions,
@@ -306,6 +287,11 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     getBudgetsByGroupId,
     getUniquePayees,
     getUniqueCategories,
+    getTotalBalance,
+    getTotalIncome,
+    getTotalExpenses,
+    getTotalBudgetAssigned,
+    getAvailableToAssign,
   ])
 
   return (
