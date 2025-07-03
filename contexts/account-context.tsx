@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { generateUUID } from "@/lib/utils"
 
 export interface Account {
   id: string
@@ -150,7 +151,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const addAccount = React.useCallback((account: Omit<Account, "id">) => {
     const newAccount: Account = {
       ...account,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
     }
     setAccounts((prev) => [...prev, newAccount])
   }, [])
@@ -158,7 +159,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const addTransaction = React.useCallback((transaction: Omit<Transaction, "id">) => {
     const newTransaction: Transaction = {
       ...transaction,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
     }
     setTransactions((prev) => [...prev, newTransaction])
   }, [])
@@ -204,7 +205,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const addCategoryGroup = React.useCallback((group: Omit<CategoryGroup, "id">) => {
     const newGroup: CategoryGroup = {
       ...group,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
     }
     setCategoryGroups((prev) => [...prev, newGroup])
   }, [])
@@ -212,7 +213,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const addCategoryBudget = React.useCallback((budget: Omit<CategoryBudget, "id">) => {
     const newBudget: CategoryBudget = {
       ...budget,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
     }
     setCategoryBudgets((prev) => [...prev, newBudget])
   }, [])

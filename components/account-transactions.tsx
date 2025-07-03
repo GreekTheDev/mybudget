@@ -148,8 +148,79 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <React.Fragment>
+      {/* Mobile Card View */}
+      <div className="block md:hidden space-y-3">
+        {data.map((transaction) => {
+          const amount = getTransactionAmount(transaction)
+          return (
+            <div key={transaction.id} className="rounded-lg border bg-card p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="font-medium text-sm mb-1">
+                    {transaction.payee || "Unknown Payee"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {formatDate(transaction.date)}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    {amount !== 0 ? (
+                      <span className={`text-sm font-medium ${
+                        amount < 0 ? "text-red-600" : "text-green-600"
+                      }`}>
+                        {amount < 0 ? `-${formatCurrency(amount)}` : formatCurrency(amount)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No amount</span>
+                    )}
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <MoreHorizontal className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        className="text-red-600"
+                        onClick={() => deleteTransaction(transaction.id)}
+                      >
+                        <Trash className="mr-2 h-3 w-3" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                {transaction.category && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-16">Category:</span>
+                    <span className="text-xs px-2 py-1 bg-muted rounded-md">
+                      {transaction.category}
+                    </span>
+                  </div>
+                )}
+                {transaction.memo && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs text-muted-foreground w-16 mt-0.5">Memo:</span>
+                    <span className="text-xs text-muted-foreground flex-1">
+                      {transaction.memo}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      
+      {/* Desktop Table View */}
+      <div className="hidden md:block rounded-md border">
+        <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[150px]">Date</TableHead>
@@ -328,5 +399,6 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
         </TableBody>
       </Table>
     </div>
+    </React.Fragment>
   )
 }

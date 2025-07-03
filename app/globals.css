@@ -115,8 +115,30 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-overflow-scrolling: touch;
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Mobile optimizations */
+  button, [role="button"], input[type="button"], input[type="submit"] {
+    min-height: 44px;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  @media screen and (max-width: 768px) {
+    input[type="text"], input[type="number"], input[type="email"], 
+    input[type="password"], select, textarea {
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Better mobile spacing */
+  @media screen and (max-width: 640px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }

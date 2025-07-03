@@ -67,23 +67,93 @@ export function CategoryBudgetTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">Budget</h3>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Category Group
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Add Category Group</span>
+            <span className="sm:hidden">Add Group</span>
           </Button>
-          <Button variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Category
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Add Category</span>
+            <span className="sm:hidden">Add Cat.</span>
           </Button>
         </div>
       </div>
 
+      {/* Mobile Card View */}
+      <div className="block md:hidden space-y-2">
+        {categoryGroups.map((group) => (
+          <div key={group.id} className="rounded-lg border bg-card">
+            {/* Group Header */}
+            <div className="p-3 bg-muted/50 rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <button
+                    onClick={() => toggleCategoryGroup(group.id)}
+                    className="mr-2 transition-transform"
+                    style={{
+                      transform: group.isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                    }}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                  <span className="font-semibold text-sm">{group.name}</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Available</div>
+                  <div className={`text-sm font-semibold ${
+                    calculateGroupTotals(group.id).available >= 0 ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {formatCurrency(calculateGroupTotals(group.id).available)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Category Items */}
+            {group.isExpanded && (
+              <div className="divide-y">
+                {getBudgetsByGroupId(group.id).map((budget) => {
+                  const activity = getCategoryActivity(budget.name)
+                  const available = budget.assignedAmount - activity
+                  
+                  return (
+                    <div key={budget.id} className="p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-medium text-sm">{budget.name}</div>
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">Available</div>
+                          <div className={`text-sm font-medium ${
+                            available >= 0 ? "text-green-600" : "text-red-600"
+                          }`}>
+                            {formatCurrency(available)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <div className="text-muted-foreground">Assigned</div>
+                          <div className="font-medium">{formatCurrency(budget.assignedAmount)}</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Activity</div>
+                          <div className="font-medium">{formatCurrency(activity)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
       
-      
-      <div className="rounded-md border">
+      {/* Desktop Table View */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>

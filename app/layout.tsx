@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AccountProvider } from "@/contexts/account-context";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,9 +39,11 @@ export default function RootLayout({
           <AccountProvider>
             <SidebarProvider>
               <AppSidebar />
-              <SidebarInset>
-                <main className="flex-1 overflow-hidden">
-                  {children}
+              <SidebarInset className="w-full min-h-screen">
+                <main className="flex-1 w-full overflow-x-hidden">
+                  <LayoutWrapper>
+                    {children}
+                  </LayoutWrapper>
                 </main>
               </SidebarInset>
             </SidebarProvider>
