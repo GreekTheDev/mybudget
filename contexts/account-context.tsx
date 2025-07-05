@@ -42,6 +42,8 @@ interface AccountContextType {
   categoryGroups: CategoryGroup[]
   categoryBudgets: CategoryBudget[]
   addAccount: (account: Omit<Account, "id">) => void
+  updateAccount: (id: string, account: Partial<Account>) => void
+  deleteAccount: (id: string) => void
   addTransaction: (transaction: Omit<Transaction, "id">) => void
   updateTransaction: (id: string, transaction: Partial<Transaction>) => void
   deleteTransaction: (id: string) => void
@@ -49,7 +51,11 @@ interface AccountContextType {
   addCategoryBudget: (budget: Omit<CategoryBudget, "id">) => void
   updateCategoryBudget: (id: string, budget: Partial<CategoryBudget>) => void
   updateCategoryGroup: (id: string, group: Partial<CategoryGroup>) => void
+  deleteCategoryGroup: (id: string) => void
   deleteCategoryBudget: (id: string) => void
+  reorderCategoryGroups: (startIndex: number, endIndex: number) => void
+  reorderCategoryBudgets: (groupId: string, startIndex: number, endIndex: number) => void
+  reorderAccounts: (startIndex: number, endIndex: number) => void
   toggleCategoryGroup: (groupId: string) => void
   getAccountById: (id: string) => Account | undefined
   getTransactionsByAccountId: (accountId: string) => Transaction[]
@@ -58,6 +64,7 @@ interface AccountContextType {
   getBudgetsByGroupId: (groupId: string) => CategoryBudget[]
   getUniquePayees: () => string[]
   getUniqueCategories: () => string[]
+  getAllAvailableCategories: () => string[]
   getTotalBalance: () => number
   getTotalIncome: () => number
   getTotalExpenses: () => number
@@ -79,23 +86,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   const [accounts, setAccounts] = React.useState<Account[]>([])
   const [transactions, setTransactions] = React.useState<Transaction[]>([])
 
-  const [categoryGroups, setCategoryGroups] = React.useState<CategoryGroup[]>([
-    { id: "bills", name: "Bills", isExpanded: false },
-    { id: "needs", name: "Needs", isExpanded: false },
-    { id: "wants", name: "Wants", isExpanded: false },
-    { id: "savings", name: "Savings", isExpanded: false },
-  ])
+  const [categoryGroups, setCategoryGroups] = React.useState<CategoryGroup[]>([])
 
-  const [categoryBudgets, setCategoryBudgets] = React.useState<CategoryBudget[]>([
-    { id: "cb1", name: "Mortgage", assignedAmount: 0, groupId: "bills" },
-    { id: "cb2", name: "TV, phone and internet", assignedAmount: 0, groupId: "bills" },
-    { id: "cb3", name: "Insurance", assignedAmount: 0, groupId: "bills" },
-    { id: "cb4", name: "Personal loans", assignedAmount: 0, groupId: "bills" },
-    { id: "cb5", name: "Music", assignedAmount: 0, groupId: "bills" },
-    { id: "cb6", name: "TV streaming", assignedAmount: 0, groupId: "bills" },
-    { id: "cb7", name: "Fitness", assignedAmount: 0, groupId: "bills" },
-    { id: "cb8", name: "Other subscriptions", assignedAmount: 0, groupId: "bills" },
-  ])
+  const [categoryBudgets, setCategoryBudgets] = React.useState<CategoryBudget[]>([])
 
   const addAccount = React.useCallback((account: Omit<Account, "id">) => {
     const newAccount: Account = {
@@ -105,27 +98,129 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     setAccounts((prev) => [...prev, newAccount])
   }, [])
 
+  const updateAccount = React.useCallback((id: string, updatedFields: Partial<Account>) => {
+    setAccounts((prev) =>
+      prev.map((account) =>
+        account.id === id
+          ? { ...account, ...updatedFields }
+          : account
+      )
+    )
+  }, [])
+
+  const deleteAccount = React.useCallback((id: string) => {
+    // First delete all transactions for this account
+    setTransactions((prev) => prev.filter((transaction) => transaction.accountId !== id))
+    // Then delete the account
+    setAccounts((prev) => prev.filter((account) => account.id !== id))
+  }, [])
+
   const addTransaction = React.useCallback((transaction: Omit<Transaction, "id">) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: generateUUID(),
     }
     setTransactions((prev) => [...prev, newTransaction])
-  }, [])
-
-  const updateTransaction = React.useCallback((id: string, updatedFields: Partial<Transaction>) => {
-    setTransactions((prev) => 
-      prev.map((transaction) => 
-        transaction.id === id 
-          ? { ...transaction, ...updatedFields }
-          : transaction
-      )
+    
+    // Update account balance when a transaction is added
+    setAccounts((prevAccounts) => 
+      prevAccounts.map((account) => {
+        if (account.id === transaction.accountId) {
+          // For income, add to balance; for expense, subtract from balance
+          const balanceChange = transaction.income - transaction.expense;
+          return {
+            ...account,
+            balance: account.balance + balanceChange
+          }
+        }
+        return account
+      })
     )
   }, [])
 
-  const deleteTransaction = React.useCallback((id: string) => {
-    setTransactions((prev) => prev.filter((transaction) => transaction.id !== id))
+  const updateTransaction = React.useCallback((id: string, updatedFields: Partial<Transaction>) => {
+    // First, find the original transaction to calculate balance changes
+    setTransactions((prev) => {
+      const originalTransaction = prev.find(t => t.id === id);
+      if (!originalTransaction) return prev;
+      
+      const updatedTransaction = { ...originalTransaction, ...updatedFields };
+      
+      // Update account balance if income or expense changed
+      if (originalTransaction.income !== updatedTransaction.income || 
+          originalTransaction.expense !== updatedTransaction.expense ||
+          originalTransaction.accountId !== updatedTransaction.accountId) {
+        
+        setAccounts(prevAccounts => {
+          return prevAccounts.map(account => {
+            // If this is the original account, remove the original transaction amount
+            if (account.id === originalTransaction.accountId) {
+              const originalBalanceChange = originalTransaction.income - originalTransaction.expense;
+              return {
+                ...account,
+                balance: account.balance - originalBalanceChange
+              };
+            }
+            // If this is the new account (in case account changed), add the new transaction amount
+            else if (updatedFields.accountId && account.id === updatedFields.accountId) {
+              const newIncome = updatedFields.income !== undefined ? updatedFields.income : originalTransaction.income;
+              const newExpense = updatedFields.expense !== undefined ? updatedFields.expense : originalTransaction.expense;
+              const newBalanceChange = newIncome - newExpense;
+              return {
+                ...account,
+                balance: account.balance + newBalanceChange
+              };
+            }
+            // If the account ID didn't change but amounts did
+            else if (!updatedFields.accountId && account.id === originalTransaction.accountId) {
+              const oldBalanceChange = originalTransaction.income - originalTransaction.expense;
+              const newIncome = updatedFields.income !== undefined ? updatedFields.income : originalTransaction.income;
+              const newExpense = updatedFields.expense !== undefined ? updatedFields.expense : originalTransaction.expense;
+              const newBalanceChange = newIncome - newExpense;
+              const netBalanceChange = newBalanceChange - oldBalanceChange;
+              
+              return {
+                ...account,
+                balance: account.balance + netBalanceChange
+              };
+            }
+            return account;
+          });
+        });
+      }
+      
+      // Return the updated transactions array
+      return prev.map(transaction => 
+        transaction.id === id 
+          ? updatedTransaction
+          : transaction
+      );
+    });
   }, [])
+
+  const deleteTransaction = React.useCallback((id: string) => {
+    // First, find the transaction to be deleted
+    const transactionToDelete = transactions.find(t => t.id === id);
+    
+    if (transactionToDelete) {
+      // Update account balance by removing the transaction amount
+      setAccounts(prevAccounts => 
+        prevAccounts.map(account => {
+          if (account.id === transactionToDelete.accountId) {
+            const balanceChange = transactionToDelete.income - transactionToDelete.expense;
+            return {
+              ...account,
+              balance: account.balance - balanceChange
+            };
+          }
+          return account;
+        })
+      );
+      
+      // Then remove the transaction from the list
+      setTransactions(prev => prev.filter(transaction => transaction.id !== id));
+    }
+  }, [transactions])
 
   const getUniquePayees = React.useCallback(() => {
     const payees = transactions.map((t) => t.payee).filter(Boolean)
@@ -136,6 +231,25 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     const categories = transactions.map((t) => t.category).filter(Boolean)
     return [...new Set(categories)].sort()
   }, [transactions])
+  
+  // Define getBudgetsByGroupId before it's used in getAllAvailableCategories
+  const getBudgetsByGroupId = React.useCallback((groupId: string) => {
+    return categoryBudgets.filter((budget) => budget.groupId === groupId)
+  }, [categoryBudgets])
+
+  const getAllAvailableCategories = React.useCallback(() => {
+    // Get all unique categories from transactions
+    const transactionCategories = transactions.map((t) => t.category).filter(Boolean)
+    
+    // Get all budget categories from all groups
+    const budgetCategories = categoryGroups.flatMap(group => 
+      getBudgetsByGroupId(group.id).map(budget => budget.name)
+    ).filter(Boolean)
+    
+    // Combine and deduplicate
+    const allCategories = [...transactionCategories, ...budgetCategories]
+    return [...new Set(allCategories)].sort()
+  }, [transactions, categoryGroups, getBudgetsByGroupId])
 
   const getAccountById = React.useCallback((id: string) => {
     return accounts.find((account) => account.id === id)
@@ -160,11 +274,17 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const addCategoryBudget = React.useCallback((budget: Omit<CategoryBudget, "id">) => {
+    // Create the new budget object with a simple ID generation
     const newBudget: CategoryBudget = {
       ...budget,
       id: generateUUID(),
+      assignedAmount: budget.assignedAmount || 0, // Ensure assignedAmount is a number
     }
+    
+    // Update state with the new budget
     setCategoryBudgets((prev) => [...prev, newBudget])
+    
+    return newBudget
   }, [])
 
   const updateCategoryBudget = React.useCallback((id: string, updatedFields: Partial<CategoryBudget>) => {
@@ -187,8 +307,46 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     )
   }, [])
 
+  const deleteCategoryGroup = React.useCallback((id: string) => {
+    // Delete all budgets in this group first
+    setCategoryBudgets((prev) => prev.filter((budget) => budget.groupId !== id))
+    // Then delete the group
+    setCategoryGroups((prev) => prev.filter((group) => group.id !== id))
+  }, [])
+
   const deleteCategoryBudget = React.useCallback((id: string) => {
     setCategoryBudgets((prev) => prev.filter((budget) => budget.id !== id))
+  }, [])
+
+  const reorderCategoryGroups = React.useCallback((startIndex: number, endIndex: number) => {
+    setCategoryGroups((prev) => {
+      const result = Array.from(prev)
+      const [removed] = result.splice(startIndex, 1)
+      result.splice(endIndex, 0, removed)
+      return result
+    })
+  }, [])
+
+  const reorderCategoryBudgets = React.useCallback((groupId: string, startIndex: number, endIndex: number) => {
+    setCategoryBudgets((prev) => {
+      const groupBudgets = prev.filter(budget => budget.groupId === groupId)
+      const otherBudgets = prev.filter(budget => budget.groupId !== groupId)
+      
+      const result = Array.from(groupBudgets)
+      const [removed] = result.splice(startIndex, 1)
+      result.splice(endIndex, 0, removed)
+      
+      return [...otherBudgets, ...result]
+    })
+  }, [])
+  
+  const reorderAccounts = React.useCallback((startIndex: number, endIndex: number) => {
+    setAccounts((prev) => {
+      const result = Array.from(prev)
+      const [removed] = result.splice(startIndex, 1)
+      result.splice(endIndex, 0, removed)
+      return result
+    })
   }, [])
 
   const toggleCategoryGroup = React.useCallback((groupId: string) => {
@@ -206,10 +364,6 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       .filter((transaction) => transaction.category === categoryName)
       .reduce((total, transaction) => total + transaction.expense, 0)
   }, [transactions])
-
-  const getBudgetsByGroupId = React.useCallback((groupId: string) => {
-    return categoryBudgets.filter((budget) => budget.groupId === groupId)
-  }, [categoryBudgets])
 
   // Calculate total balance across all accounts
   const getTotalBalance = React.useCallback(() => {
@@ -244,6 +398,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     categoryGroups,
     categoryBudgets,
     addAccount,
+    updateAccount,
+    deleteAccount,
     addTransaction,
     updateTransaction,
     deleteTransaction,
@@ -251,7 +407,11 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     addCategoryBudget,
     updateCategoryBudget,
     updateCategoryGroup,
+    deleteCategoryGroup,
     deleteCategoryBudget,
+    reorderCategoryGroups,
+    reorderCategoryBudgets,
+    reorderAccounts,
     toggleCategoryGroup,
     getAccountById,
     getTransactionsByAccountId,
@@ -260,6 +420,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     getBudgetsByGroupId,
     getUniquePayees,
     getUniqueCategories,
+    getAllAvailableCategories,
     getTotalBalance,
     getTotalIncome,
     getTotalExpenses,
@@ -271,6 +432,8 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     categoryGroups,
     categoryBudgets,
     addAccount,
+    updateAccount,
+    deleteAccount,
     addTransaction,
     updateTransaction,
     deleteTransaction,
@@ -278,7 +441,11 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     addCategoryBudget,
     updateCategoryBudget,
     updateCategoryGroup,
+    deleteCategoryGroup,
     deleteCategoryBudget,
+    reorderCategoryGroups,
+    reorderCategoryBudgets,
+    reorderAccounts,
     toggleCategoryGroup,
     getAccountById,
     getTransactionsByAccountId,
@@ -287,6 +454,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     getBudgetsByGroupId,
     getUniquePayees,
     getUniqueCategories,
+    getAllAvailableCategories,
     getTotalBalance,
     getTotalIncome,
     getTotalExpenses,

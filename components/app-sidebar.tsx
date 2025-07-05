@@ -252,9 +252,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span className="sr-only">Settings</span>
               </SidebarMenuButton>
               <ModeToggle />
-              <SidebarTrigger 
-                className="h-9 w-9 p-0" 
-              />
+              <SidebarTrigger />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

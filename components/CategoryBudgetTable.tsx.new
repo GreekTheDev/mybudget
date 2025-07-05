@@ -141,8 +141,6 @@ export function CategoryBudgetTable() {
   const [editingAmount, setEditingAmount] = React.useState<string | null>(null)
   const [editingGroupName, setEditingGroupName] = React.useState<string | null>(null)
   const [removeMode, setRemoveMode] = React.useState(false)
-  // This state tracks which group is currently having a category added to it
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [addingCategoryToGroup, setAddingCategoryToGroup] = React.useState<string | null>(null)
   const [newCategoryName, setNewCategoryName] = React.useState("")
   const [addGroupDialogOpen, setAddGroupDialogOpen] = React.useState(false)
@@ -278,7 +276,7 @@ export function CategoryBudgetTable() {
         groupId: groupId
       })
       
-      // Auto-close the dropdown and reset form state
+      // Reset the form state
       setNewCategoryName("")
       setAddingCategoryToGroup(null)
     } catch (error) {
@@ -288,9 +286,18 @@ export function CategoryBudgetTable() {
   }
 
   const handleCancelAddCategory = () => {
-    // Close the dropdown and reset form state
-    setNewCategoryName("")
-    setAddingCategoryToGroup(null)
+    try {
+      // Reset the state
+      setNewCategoryName("")
+      setAddingCategoryToGroup(null)
+    } catch (error) {
+      console.error("Error canceling add category:", error)
+      // Force reset the state in case of error
+      setTimeout(() => {
+        setNewCategoryName("")
+        setAddingCategoryToGroup(null)
+      }, 0)
+    }
   }
 
   return (
@@ -350,7 +357,7 @@ export function CategoryBudgetTable() {
         <div className="block md:hidden space-y-2">
           {categoryGroups.length === 0 ? (
             <div className="rounded-lg border bg-card p-6 text-center">
-              <p className="text-muted-foreground">No groups! Click the &quot;+ Add Category Group Button&quot; to create a new budget group!</p>
+              <p className="text-muted-foreground">No groups! Click the "+ Add Category Group Button" to create a new budget group!</p>
             </div>
           ) : (
             categoryGroups.map((group) => (
@@ -371,7 +378,7 @@ export function CategoryBudgetTable() {
                       <div className="flex items-center group/mobile-header">
                         <span className="font-medium text-xs">{group.name}</span>
                         {getBudgetsByGroupId(group.id).length === 0 && (
-                          <span className="ml-2 text-xs text-muted-foreground">Add a new category here →!</span>
+                          <span className="ml-2 text-xs text-muted-foreground">Add a new category here →</span>
                         )}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -391,12 +398,8 @@ export function CategoryBudgetTable() {
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
                                     handleAddCategory(group.id)
-                                    // Close the dropdown by clicking outside
-                                    document.body.click()
                                   } else if (e.key === 'Escape') {
                                     handleCancelAddCategory()
-                                    // Close the dropdown by clicking outside
-                                    document.body.click()
                                   }
                                 }}
                                 autoFocus
@@ -404,11 +407,7 @@ export function CategoryBudgetTable() {
                               <div className="flex gap-2">
                                 <Button
                                   size="sm"
-                                  onClick={() => {
-                                    handleAddCategory(group.id)
-                                    // Close the dropdown by clicking outside
-                                    document.body.click()
-                                  }}
+                                  onClick={() => handleAddCategory(group.id)}
                                   disabled={!newCategoryName.trim()}
                                 >
                                   OK
@@ -416,11 +415,7 @@ export function CategoryBudgetTable() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => {
-                                    handleCancelAddCategory()
-                                    // Close the dropdown by clicking outside
-                                    document.body.click()
-                                  }}
+                                  onClick={handleCancelAddCategory}
                                 >
                                   Cancel
                                 </Button>
@@ -523,7 +518,7 @@ export function CategoryBudgetTable() {
                 {categoryGroups.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={removeMode ? 6 : 5} className="h-24 text-center">
-                      <p className="text-muted-foreground">No groups! Click the &quot;+ Add Category Group Button&quot; to create a new budget group!</p>
+                      <p className="text-muted-foreground">No groups! Click the "+ Add Category Group Button" to create a new budget group!</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -592,12 +587,8 @@ export function CategoryBudgetTable() {
                                           onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                               handleAddCategory(group.id)
-                                              // Close the dropdown by clicking outside
-                                              document.body.click()
                                             } else if (e.key === 'Escape') {
                                               handleCancelAddCategory()
-                                              // Close the dropdown by clicking outside
-                                              document.body.click()
                                             }
                                           }}
                                           autoFocus
@@ -605,11 +596,7 @@ export function CategoryBudgetTable() {
                                         <div className="flex gap-2">
                                           <Button
                                             size="sm"
-                                            onClick={() => {
-                                              handleAddCategory(group.id)
-                                              // Close the dropdown by clicking outside
-                                              document.body.click()
-                                            }}
+                                            onClick={() => handleAddCategory(group.id)}
                                             disabled={!newCategoryName.trim()}
                                           >
                                             OK
@@ -617,11 +604,7 @@ export function CategoryBudgetTable() {
                                           <Button
                                             size="sm"
                                             variant="outline"
-                                            onClick={() => {
-                                              handleCancelAddCategory()
-                                              // Close the dropdown by clicking outside
-                                              document.body.click()
-                                            }}
+                                            onClick={handleCancelAddCategory}
                                           >
                                             Cancel
                                           </Button>

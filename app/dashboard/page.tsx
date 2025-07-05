@@ -4,16 +4,10 @@ import { Calculator, TrendingUp, CreditCard } from "lucide-react";
 import { CategoryBudgetTable } from "@/components/CategoryBudgetTable";
 import { MoneyStatusIndicator } from "@/components/money-status-indicator";
 import { useAccounts } from "@/contexts/account-context";
+import { formatCurrency } from "@/lib/utils";
 
 export default function Dashboard() {
   const { getTotalBalance, getTotalIncome, getTotalExpenses, getTotalBudgetAssigned } = useAccounts()
-  
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount)
-  }
   
   const totalBalance = getTotalBalance()
   const totalBudgetAssigned = getTotalBudgetAssigned()

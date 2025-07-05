@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Input } from "@/components/ui/input"
 import { ComboboxWithAdd } from "@/components/ui/combobox-with-add"
+import { formatCurrency } from "@/lib/utils"
 import {
   Table,
   TableBody,
@@ -15,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useAccounts, Transaction } from "@/contexts/account-context"
-import { MoreHorizontal, Trash } from "lucide-react"
+import { MoreHorizontal, Trash, Plus, Pencil } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,56 +24,54 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu"
+
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 
 interface AccountTransactionsProps {
   accountId?: string
+  selectedMonth?: Date
 }
 
-export function AccountTransactions({ accountId }: AccountTransactionsProps) {
+export function AccountTransactions({ accountId, selectedMonth }: AccountTransactionsProps) {
   const { 
     transactions, 
-    accounts,
-    addTransaction,
     updateTransaction, 
     deleteTransaction, 
     getUniquePayees, 
-    getUniqueCategories 
+    getAllAvailableCategories
   } = useAccounts()
   
   const [isClient, setIsClient] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [showAddDialog, setShowAddDialog] = React.useState(false)
-  const [showNewRow, setShowNewRow] = React.useState(false)
-  const [newTransaction, setNewTransaction] = React.useState({
-    payee: "",
-    amount: "",
-    accountId: accountId || "",
-    date: new Date(),
-    category: "",
-    memo: ""
-  })
-
+  const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
   React.useEffect(() => {
     setIsClient(true)
   }, [])
 
-  const data: Transaction[] = accountId
+  let data: Transaction[] = accountId
     ? transactions.filter(t => t.accountId === accountId)
     : transactions
 
-  const formatCurrency = (amount: number) => {
+  // Filter by selected month if provided
+  if (selectedMonth) {
+    data = data.filter(t => {
+      const transactionDate = new Date(t.date)
+      return transactionDate.getMonth() === selectedMonth.getMonth() &&
+             transactionDate.getFullYear() === selectedMonth.getFullYear()
+    })
+  }
+
+  // Wrapper around the shared formatCurrency function to handle zero values
+  const formatTransactionAmount = (amount: number) => {
     if (amount === 0) return ""
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(Math.abs(amount))
+    return formatCurrency(Math.abs(amount))
   }
 
   const formatDate = (date: Date) => {
@@ -103,54 +102,16 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
   }
 
   const handleAddNewTransaction = () => {
-    // For mobile, show dialog
-    if (window.innerWidth < 768) {
-      setShowAddDialog(true)
-    } else {
-      // For desktop, show new row
-      setShowNewRow(true)
-    }
+    // Use dialog for both mobile and desktop
+    setShowAddDialog(true);
+  }
+  
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setShowAddDialog(true);
   }
 
-  const handleSaveNewTransaction = () => {
-    if (!newTransaction.payee || !newTransaction.amount) return
-
-    const amount = parseFloat(newTransaction.amount)
-    if (isNaN(amount)) return
-
-    const transaction = {
-      accountId: newTransaction.accountId,
-      date: newTransaction.date,
-      payee: newTransaction.payee,
-      category: newTransaction.category,
-      memo: newTransaction.memo,
-      income: amount > 0 ? amount : 0,
-      expense: amount < 0 ? Math.abs(amount) : 0,
-    }
-
-    addTransaction(transaction)
-    setShowNewRow(false)
-    setNewTransaction({
-      payee: "",
-      amount: "",
-      accountId: accountId || "",
-      date: new Date(),
-      category: "",
-      memo: ""
-    })
-  }
-
-  const handleCancelNewTransaction = () => {
-    setShowNewRow(false)
-    setNewTransaction({
-      payee: "",
-      amount: "",
-      accountId: accountId || "",
-      date: new Date(),
-      category: "",
-      memo: ""
-    })
-  }
+  // We now use the dialog component for adding transactions
 
   const isEditing = (transactionId: string, fieldName: string) => {
     return editingField === `${transactionId}-${fieldName}`
@@ -160,24 +121,55 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
   if (data.length === 0) {
     return (
       <React.Fragment>
-        <div className="flex items-center justify-center h-32 text-muted-foreground mb-4">
-          No transactions found
+        {/* Header without Add Transaction Button */}
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Transactions</h3>
+          {/* Only show Add Transaction button on desktop */}
+          <div className="hidden md:block">
+            <Button 
+              onClick={handleAddNewTransaction}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Transaction</span>
+            </Button>
+          </div>
         </div>
-        <div className="mt-4">
-          <Button 
-            variant="outline" 
-            onClick={handleAddNewTransaction}
-          >
-            Add Transaction
-          </Button>
+        
+        {/* Empty state with call-to-action */}
+        <div className="flex flex-col items-center justify-center h-64 border rounded-lg bg-muted/10 mb-4">
+          <p className="text-muted-foreground mb-4">No transactions found</p>
+          {/* Only show button on desktop, on mobile use the navbar button */}
+          <div className="hidden md:block">
+            <Button 
+              onClick={handleAddNewTransaction}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Your First Transaction</span>
+            </Button>
+          </div>
+          <p className="block md:hidden text-xs text-muted-foreground">
+            Use the + button in the navbar to add a transaction
+          </p>
         </div>
         
         {/* Mobile Add Transaction Dialog */}
         <AddTransactionDialog 
           open={showAddDialog}
-          onOpenChange={setShowAddDialog}
+          onOpenChange={(open) => {
+            setShowAddDialog(open);
+            if (!open) {
+              // Reset editing transaction when dialog closes
+              setEditingTransaction(null);
+            }
+          }}
           accountId={accountId}
+          existingTransaction={editingTransaction}
         />
+        
+        {/* We now use the dialog for both mobile and desktop */}
       </React.Fragment>
     )
   }
@@ -207,7 +199,7 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
                   <TableCell>{transaction.memo}</TableCell>
                   <TableCell className="text-right">
                     <span className={amount < 0 ? "text-red-600" : "text-green-600"}>
-                      {amount !== 0 ? (amount < 0 ? `-${formatCurrency(amount)}` : formatCurrency(amount)) : ""}
+                      {amount !== 0 ? (amount < 0 ? `-${formatTransactionAmount(amount)}` : formatTransactionAmount(amount)) : ""}
                     </span>
                   </TableCell>
                   <TableCell className="w-16">
@@ -236,71 +228,112 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
 
   return (
     <React.Fragment>
+      {/* Header without Add Transaction Button on mobile */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Transactions</h3>
+        {/* Only show Add Transaction button on desktop */}
+        <div className="hidden md:block">
+          <Button 
+            onClick={handleAddNewTransaction}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Transaction</span>
+          </Button>
+        </div>
+      </div>
+      
+      {/* Transaction Dialog for adding/editing */}
+      <AddTransactionDialog 
+        open={showAddDialog}
+        onOpenChange={(open) => {
+          setShowAddDialog(open);
+          if (!open) {
+            // Reset editing transaction when dialog closes
+            setEditingTransaction(null);
+          }
+        }}
+        accountId={accountId}
+        existingTransaction={editingTransaction}
+      />
+      
       {/* Mobile Card View */}
       <div className="block md:hidden space-y-3">
         {data.map((transaction) => {
           const amount = getTransactionAmount(transaction)
           return (
-            <div key={transaction.id} className="rounded-lg border bg-card p-4">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <div className="font-medium text-sm mb-1">
-                    {transaction.payee || "Unknown Payee"}
+            <ContextMenu key={transaction.id}>
+              <ContextMenuTrigger>
+                <div 
+                  className="rounded-lg border bg-card p-4 cursor-pointer"
+                  onClick={() => handleEditTransaction(transaction)}>
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      {/* Increased title font */}
+                      <div className="font-medium text-base mb-1">
+                        {transaction.payee || "Unknown Payee"}
+                      </div>
+                      
+                      {/* Category without decoration */}
+                      {transaction.category && (
+                        <div className="text-xs text-muted-foreground">
+                          {transaction.category}
+                        </div>
+                      )}
+                      
+                      {/* Date below category */}
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {formatDate(transaction.date)}
+                      </div>
+                    </div>
+                    
+                    {/* Amount with bigger font, vertically centered */}
+                    <div className="flex items-center">
+                      <div className="text-right">
+                        {amount !== 0 ? (
+                          <span className={`text-lg font-medium ${
+                            amount < 0 ? "text-red-600" : "text-green-600"
+                          }`}>
+                            {amount < 0 ? `-${formatCurrency(amount)}` : formatCurrency(amount)}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">No amount</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatDate(transaction.date)}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-right">
-                    {amount !== 0 ? (
-                      <span className={`text-sm font-medium ${
-                        amount < 0 ? "text-red-600" : "text-green-600"
-                      }`}>
-                        {amount < 0 ? `-${formatCurrency(amount)}` : formatCurrency(amount)}
+                  
+                  {/* Memo section */}
+                  {transaction.memo && (
+                    <div className="mt-3 pt-2 border-t border-border">
+                      <span className="text-xs text-muted-foreground block">
+                        {transaction.memo}
                       </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">No amount</span>
-                    )}
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <MoreHorizontal className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem 
-                        className="text-red-600"
-                        onClick={() => deleteTransaction(transaction.id)}
-                      >
-                        <Trash className="mr-2 h-3 w-3" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                {transaction.category && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-16">Category:</span>
-                    <span className="text-xs px-2 py-1 bg-muted rounded-md">
-                      {transaction.category}
-                    </span>
-                  </div>
-                )}
-                {transaction.memo && (
-                  <div className="flex items-start gap-2">
-                    <span className="text-xs text-muted-foreground w-16 mt-0.5">Memo:</span>
-                    <span className="text-xs text-muted-foreground flex-1">
-                      {transaction.memo}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem
+                  onClick={() => handleEditTransaction(transaction)}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Transaction
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem 
+                  variant="destructive"
+                  onClick={() => {
+                    if (confirm(`Delete transaction "${transaction.payee}"?`)) {
+                      deleteTransaction(transaction.id);
+                    }
+                  }}
+                >
+                  <Trash className="h-4 w-4 mr-2" />
+                  Delete Transaction
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           )
         })}
       </div>
@@ -383,7 +416,7 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
                           updateTransaction(transaction.id, { category })
                           handleFieldBlur()
                         }}
-                        options={getUniqueCategories()}
+                        options={getAllAvailableCategories()}
                         placeholder="Select category"
                         className="w-full"
                       />
@@ -472,7 +505,10 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem 
                         className="text-red-600"
-                        onClick={() => deleteTransaction(transaction.id)}
+                        onClick={() => {
+                          // Call deleteTransaction which should update the account balance
+                          deleteTransaction(transaction.id);
+                        }}
                       >
                         <Trash className="mr-2 h-4 w-4" />
                         Delete
@@ -484,99 +520,9 @@ export function AccountTransactions({ accountId }: AccountTransactionsProps) {
             )
           })}
           
-          {/* New Transaction Row for Desktop */}
-          {showNewRow && (
-            <TableRow className="bg-muted/20">
-              {/* Date */}
-              <TableCell className="w-[150px]">
-                <DatePicker
-                  date={newTransaction.date}
-                  onDateChange={(date) => {
-                    if (date) {
-                      setNewTransaction(prev => ({ ...prev, date }))
-                    }
-                  }}
-                  className="w-[140px]"
-                />
-              </TableCell>
-              
-              {/* Payee */}
-              <TableCell className="w-[200px]">
-                <Input
-                  value={newTransaction.payee}
-                  onChange={(e) => setNewTransaction(prev => ({ ...prev, payee: e.target.value }))}
-                  placeholder="Enter payee name"
-                  className="w-[190px]"
-                />
-              </TableCell>
-              
-              {/* Category */}
-              <TableCell className="w-[150px]">
-                <Input
-                  value={newTransaction.category}
-                  onChange={(e) => setNewTransaction(prev => ({ ...prev, category: e.target.value }))}
-                  placeholder="Enter category"
-                  className="w-[140px]"
-                />
-              </TableCell>
-              
-              {/* Memo */}
-              <TableCell className="w-auto">
-                <Input
-                  value={newTransaction.memo}
-                  onChange={(e) => setNewTransaction(prev => ({ ...prev, memo: e.target.value }))}
-                  placeholder="Enter memo"
-                  className="min-w-[150px]"
-                />
-              </TableCell>
-              
-              {/* Amount */}
-              <TableCell className="w-[120px] text-right">
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={newTransaction.amount}
-                  onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
-                  placeholder="0.00"
-                  className="w-[110px] ml-auto text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </TableCell>
-              
-              {/* Actions */}
-              <TableCell className="w-16">
-                <div className="flex gap-1">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={handleSaveNewTransaction}
-                    disabled={!newTransaction.payee || !newTransaction.amount}
-                  >
-                    Save
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={handleCancelNewTransaction}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
+          {/* We now use the dialog for both mobile and desktop */}
         </TableBody>
       </Table>
-      
-      {/* Add Transaction Button */}
-      <div className="mt-4">
-        <Button 
-          variant="outline" 
-          onClick={handleAddNewTransaction}
-          disabled={showNewRow}
-        >
-          Add Transaction
-        </Button>
-      </div>
     </div>
     
     {/* Mobile Add Transaction Dialog */}

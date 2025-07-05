@@ -51,7 +51,7 @@ export default function ReportsPage() {
             <Calendar className="h-12 w-12 mx-auto text-muted-foreground" />
             <h3 className="text-lg font-semibold">Reports Coming Soon</h3>
             <p className="text-sm text-muted-foreground max-w-sm">
-              We're working on comprehensive reporting features including charts, 
+              We are working on comprehensive reporting features including charts, 
               analytics, and insights to help you understand your finances better.
             </p>
           </div>

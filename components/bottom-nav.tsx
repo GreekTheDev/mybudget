@@ -9,10 +9,27 @@ import { Button } from "@/components/ui/button"
 
 interface BottomNavProps {
   onAddAccount: () => void
+  onAddTransaction?: () => void
 }
 
-export function BottomNav({ onAddAccount }: BottomNavProps) {
+export function BottomNav({ onAddAccount, onAddTransaction }: BottomNavProps) {
   const pathname = usePathname()
+
+  // Determine if we're on an account page to know which action to prioritize
+  const isOnAccountPage = pathname.startsWith("/accounts/") && pathname.split("/").length > 2
+
+  const handleAddButtonClick = () => {
+    if (isOnAccountPage && onAddTransaction) {
+      // Prioritize adding transactions when on an account page
+      onAddTransaction();
+    } else if (onAddTransaction) {
+      // Use transaction dialog when available
+      onAddTransaction();
+    } else {
+      // Fallback to account dialog if transaction handler is not available
+      onAddAccount();
+    }
+  }
 
   const navItems = [
     {
@@ -30,10 +47,10 @@ export function BottomNav({ onAddAccount }: BottomNavProps) {
     {
       href: "#",
       icon: Plus,
-      label: "Add",
+      label: "Add Transaction",
       isActive: false,
       isAction: true,
-      onClick: onAddAccount
+      onClick: handleAddButtonClick
     },
     {
       href: "/reports",
@@ -51,6 +68,7 @@ export function BottomNav({ onAddAccount }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border md:hidden">
+      
       <div className="flex items-center justify-around px-2 py-1">
         {navItems.map((item) => {
           const Icon = item.icon
