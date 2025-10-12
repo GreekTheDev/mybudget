@@ -4,6 +4,7 @@ import "./globals.css";
 import ConditionalTopBar from "@/components/layout/ConditionalTopBar";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileNavbar from "@/components/layout/MobileNavbar";
+import FloatingActionButton from "@/components/layout/FloatingActionButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,11 +50,12 @@ export default function RootLayout({
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
             <ConditionalTopBar />
-            <main className="flex-1 overflow-auto pb-24 md:pb-0">
+            <main className="flex-1 overflow-auto pb-42 md:pb-0">
               {children}
             </main>
           </div>
           <MobileNavbar />
+          <FloatingActionButton />
         </div>
       </body>
     </html>

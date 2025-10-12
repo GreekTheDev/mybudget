@@ -82,12 +82,12 @@ export default function Guide() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="mb-4">
           {/* Sidebar with sections */}
-          <div className="lg:col-span-1">
+          <div>
             <div className="border border-border rounded-lg p-4">
               <h2 className="text-lg font-semibold mb-4 text-foreground">Spis treści</h2>
-              <nav className="space-y-2">
+              <nav className="flex flex-row gap-2">
                 {guideSections.map((section) => (
                   <button
                     key={section.id}
@@ -103,6 +103,7 @@ export default function Guide() {
                 ))}
               </nav>
             </div>
+          </div>
           </div>
 
           {/* Main content */}
@@ -138,32 +139,8 @@ export default function Guide() {
               )}
             </div>
 
-            {/* Additional resources */}
-            <div className="mt-6 border border-border rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4 text-foreground">
-                Dodatkowe zasoby
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border border-border rounded-lg p-4">
-                  <h4 className="font-semibold text-foreground mb-2">📚 Polecane książki</h4>
-                  <ul className="text-sm text-secondary space-y-1">
-                    <li>• Bogaty ojciec, biedny ojciec - Robert Kiyosaki</li>
-                    <li>• Finansowy ninja - Michał Szafrański</li>
-                    <li>• Psychologia pieniędzy - Morgan Housel</li>
-                  </ul>
-                </div>
-                <div className="border border-border rounded-lg p-4">
-                  <h4 className="font-semibold text-foreground mb-2">🌐 Przydatne strony</h4>
-                  <ul className="text-sm text-secondary space-y-1">
-                    <li>• Narodowy Bank Polski - kursy walut</li>
-                    <li>• Komisja Nadzoru Finansowego</li>
-                    <li>• Kalkulatory finansowe online</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+
           </div>
-        </div>
       </div>
     </div>
   );

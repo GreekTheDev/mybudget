@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatCurrency } from '@/lib/utils';
+import { 
+  GoalLayout,
+  GoalSection,
+  GoalSummaryCard
+} from '@/components/pages/goals';
 
 interface Goal {
   id: string;
@@ -78,28 +82,6 @@ export default function Goals() {
   const [debtGoals] = useState<Goal[]>(mockDebtGoals);
   const [isMobile, setIsMobile] = useState(false);
 
-  const getProgressPercentage = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100);
-  };
-
-  const getProgressColor = (current: number, target: number, isDebt: boolean = false) => {
-    const percentage = (current / target) * 100;
-    if (isDebt) {
-      // For debts, higher percentage is better (more paid off)
-      if (percentage >= 80) return 'bg-green-500';
-      if (percentage >= 50) return 'bg-yellow-500';
-      return 'bg-red-500';
-    } else {
-      // For savings, higher percentage is better (more saved)
-      if (percentage >= 80) return 'bg-green-500';
-      if (percentage >= 50) return 'bg-yellow-500';
-      return 'bg-red-500';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pl-PL');
-  };
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -112,51 +94,6 @@ export default function Goals() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  const renderGoalCard = (goal: Goal, isDebt: boolean = false) => (
-    <div 
-      key={goal.id}
-      className="border border-border rounded-lg p-6 hover:bg-opacity-80 transition-colors"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-medium text-foreground">{goal.name}</h3>
-        <div className="text-right">
-          <p className="text-sm text-secondary">
-            {isDebt ? 'Spłacono / Do spłacenia' : 'Zgromadzono / Cel'}
-          </p>
-          <p className="font-semibold text-foreground">
-            {formatCurrency(goal.current)} / {formatCurrency(goal.target)}
-          </p>
-        </div>
-      </div>
-      
-      <div className="mb-2">
-        <div className="flex justify-between text-sm text-secondary mb-1">
-          <span>Postęp</span>
-          <span>{getProgressPercentage(goal.current, goal.target).toFixed(0)}%</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className={`h-2 rounded-full ${getProgressColor(goal.current, goal.target, isDebt)}`}
-            style={{ width: `${getProgressPercentage(goal.current, goal.target)}%` }}
-          ></div>
-        </div>
-      </div>
-
-      <div className="flex justify-between text-sm">
-        <span className={`font-medium ${isDebt ? 'text-green-600' : 'text-green-600'}`}>
-          {isDebt 
-            ? `Pozostało do spłaty: ${formatCurrency(goal.target - goal.current)}`
-            : `Pozostało do celu: ${formatCurrency(goal.target - goal.current)}`
-          }
-        </span>
-        {goal.deadline && (
-          <span className="text-xs text-secondary">
-            Do: {formatDate(goal.deadline)}
-          </span>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="container mx-auto px-4">
@@ -173,122 +110,22 @@ export default function Goals() {
 
         {/* Summary Blocks */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Savings Summary */}
-          <div className="border border-border rounded-lg p-6 ">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Oszczędności</h3>
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold"></span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-secondary">Łączny cel:</span>
-                <span className="font-semibold text-foreground">
-                  {formatCurrency(savingsGoals.reduce((sum, goal) => sum + goal.target, 0))}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-secondary">Zgromadzono:</span>
-                <span className="font-semibold text-green-600">
-                  {formatCurrency(savingsGoals.reduce((sum, goal) => sum + goal.current, 0))}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-secondary">Pozostało:</span>
-                <span className="font-semibold text-foreground">
-                  {formatCurrency(savingsGoals.reduce((sum, goal) => sum + (goal.target - goal.current), 0))}
-                </span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-border">
-                <div className="flex justify-between text-sm">
-                  <span className="text-secondary">Średni postęp:</span>
-                  <span className="font-medium text-foreground">
-                    {Math.round(savingsGoals.reduce((sum, goal) => sum + getProgressPercentage(goal.current, goal.target), 0) / savingsGoals.length)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Debts Summary */}
-          <div className="border border-border rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Długi</h3>
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold"></span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-secondary">Łączny dług:</span>
-                <span className="font-semibold text-foreground">
-                  {formatCurrency(debtGoals.reduce((sum, goal) => sum + goal.target, 0))}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-secondary">Spłacono:</span>
-                <span className="font-semibold text-green-600">
-                  {formatCurrency(debtGoals.reduce((sum, goal) => sum + goal.current, 0))}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-secondary">Pozostało:</span>
-                <span className="font-semibold text-red-600">
-                  {formatCurrency(debtGoals.reduce((sum, goal) => sum + (goal.target - goal.current), 0))}
-                </span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-border">
-                <div className="flex justify-between text-sm">
-                  <span className="text-secondary">Średni postęp:</span>
-                  <span className="font-medium text-foreground">
-                    {Math.round(debtGoals.reduce((sum, goal) => sum + getProgressPercentage(goal.current, goal.target), 0) / debtGoals.length)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <GoalSummaryCard goals={savingsGoals} type="savings" />
+          <GoalSummaryCard goals={debtGoals} type="debts" />
         </div>
 
-        {isMobile ? (
-          /* Mobile: Single column with sections */
-          <div className="space-y-8">
-            {/* Savings Section */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Zbieram na</h2>
-              <div className="space-y-4">
-                {savingsGoals.map((goal) => renderGoalCard(goal, false))}
-              </div>
-            </div>
-
-            {/* Debts Section */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Spłacam</h2>
-              <div className="space-y-4">
-                {debtGoals.map((goal) => renderGoalCard(goal, true))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Desktop: Two columns */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Savings Column */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Zbieram na</h2>
-              <div className="space-y-4">
-                {savingsGoals.map((goal) => renderGoalCard(goal, false))}
-              </div>
-            </div>
-
-            {/* Debts Column */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Spłacam</h2>
-              <div className="space-y-4">
-                {debtGoals.map((goal) => renderGoalCard(goal, true))}
-              </div>
-            </div>
-          </div>
-        )}
+        <GoalLayout isMobile={isMobile}>
+          <GoalSection 
+            goals={savingsGoals} 
+            title="Zbieram na" 
+            isDebt={false} 
+          />
+          <GoalSection 
+            goals={debtGoals} 
+            title="Spłacam" 
+            isDebt={true} 
+          />
+        </GoalLayout>
       </div>
     </div>
   );

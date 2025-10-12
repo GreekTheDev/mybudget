@@ -1,9 +1,32 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTheme } from '@/hooks/useTheme';
+import { updateFABPosition, getFABPosition } from '@/components/layout/FloatingActionButton';
+
+type FABPosition = 'left' | 'right' | 'disabled';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
+  const [fabPosition, setFabPosition] = useState<FABPosition>('right');
+
+  useEffect(() => {
+    setFabPosition(getFABPosition());
+  }, []);
+
+  const handleFABPositionChange = (newPosition: FABPosition) => {
+    setFabPosition(newPosition);
+    updateFABPosition(newPosition);
+  };
+
+  const getFABPositionLabel = (position: FABPosition) => {
+    switch (position) {
+      case 'left': return 'Lewy dolny róg';
+      case 'right': return 'Prawy dolny róg';
+      case 'disabled': return 'Ukryty';
+      default: return position;
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 ">
@@ -39,6 +62,29 @@ export default function Settings() {
                   </svg>
                 )}
               </button>
+            </div>
+          </div>
+
+          {/* Mobile FAB Settings */}
+          <div className=" border border-border rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-foreground">Interfejs mobilny</h2>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-foreground">Przycisk szybkich akcji</h3>
+                <p className="text-sm text-secondary">
+                  Wybierz pozycję lub ukryj przycisk plus na urządzeniach mobilnych
+                </p>
+              </div>
+              <select 
+                className="px-4 py-2 border border-border rounded-lg text-foreground bg-background appearance-none"
+                value={fabPosition}
+                onChange={(e) => handleFABPositionChange(e.target.value as FABPosition)}
+              >
+                <option value="right">Prawy róg</option>
+                <option value="left">Lewy róg</option>
+                <option value="disabled">Ukryty</option>
+              </select>
             </div>
           </div>
 
@@ -100,7 +146,7 @@ export default function Settings() {
                   </p>
                 </div>
                 <a
-                  href="https://your-blog-url.com"
+                  href="https://blog.placesobie.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"
@@ -120,7 +166,7 @@ export default function Settings() {
                   </p>
                 </div>
                 <a
-                  href="https://your-website-url.com"
+                  href="https://greekthedev.click"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors"

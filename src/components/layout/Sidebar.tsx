@@ -207,7 +207,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer with action buttons */}
-      <div className="p-4 border-t border-border transition-all duration-300 ease-in-out" style={{ borderColor: 'var(--border)' }}>
+      <div className="p-4 transition-all duration-300 ease-in-out">
         <div className={cn(
           "flex gap-4 transition-all duration-300 ease-in-out",
           isCollapsed ? "flex-col items-center" : "flex-row justify-between"

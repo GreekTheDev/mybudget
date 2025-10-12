@@ -131,3 +131,31 @@ export interface ReportCategory {
   icon: string;
   color: string;
 }
+
+// Budget Domain Models
+export interface BudgetCategory {
+  id: string;
+  name: string;
+  limit: number;
+  spent: number;
+  color: string;
+}
+
+export interface BudgetGroup {
+  id: string;
+  name: string;
+  categories: BudgetCategory[];
+}
+
+export interface BudgetState {
+  groups: BudgetGroup[];
+}
+
+export type BudgetAction =
+  | { type: 'ADD_GROUP'; payload: { name: string } }
+  | { type: 'EDIT_GROUP'; payload: { id: string; name: string } }
+  | { type: 'DELETE_GROUP'; payload: { id: string } }
+  | { type: 'ADD_CATEGORY'; payload: { groupId: string; name: string; limit: number } }
+  | { type: 'EDIT_CATEGORY'; payload: { groupId: string; categoryId: string; name: string; limit: number } }
+  | { type: 'DELETE_CATEGORY'; payload: { groupId: string; categoryId: string } };
+
