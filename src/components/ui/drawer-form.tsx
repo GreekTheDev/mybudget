@@ -50,9 +50,11 @@ export function DrawerForm<T extends Record<string, unknown>>({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerTrigger asChild>
-        {triggerButton}
-      </DrawerTrigger>
+      {triggerButton && (
+        <DrawerTrigger asChild>
+          {triggerButton}
+        </DrawerTrigger>
+      )}
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
@@ -63,7 +65,7 @@ export function DrawerForm<T extends Record<string, unknown>>({
               {children(form)}
             </div>
             <DrawerFooter>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full text-white">
                 Zapisz
               </Button>
               <DrawerClose asChild>

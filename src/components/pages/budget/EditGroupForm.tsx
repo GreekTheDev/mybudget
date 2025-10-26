@@ -34,12 +34,16 @@ export function EditGroupForm({ group, triggerButton, isOpen, onOpenChange }: Ed
     </Button>
   );
 
+  // When controlled externally (isOpen/onOpenChange provided), don't render trigger button
+  const shouldRenderTrigger = isOpen === undefined || onOpenChange === undefined;
+  const finalTriggerButton = shouldRenderTrigger ? (triggerButton || defaultTriggerButton) : null;
+
   return (
     <DrawerForm<EditGroupFormData>
       title="Edytuj grupę budżetową"
       defaultValues={{ name: group.name }}
       onSubmit={handleSubmit}
-      triggerButton={triggerButton || defaultTriggerButton}
+      triggerButton={finalTriggerButton}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
     >

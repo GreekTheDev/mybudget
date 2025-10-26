@@ -124,7 +124,9 @@ export default function MorePage() {
         </div>
 
         <div className="grid gap-3">
-          {moreItems.map((item) => (
+          {moreItems
+            .filter((item) => !['/cashflow', '/reports', '/guide'].includes(item.href))
+            .map((item) => (
             <Link
               key={item.name}
               href={item.href}

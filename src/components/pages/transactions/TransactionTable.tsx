@@ -14,10 +14,10 @@ export function TransactionTable({ transactions, accounts, className = "" }: Tra
         <table className="w-full">
           <thead className="border-b border-border">
             <tr>
-              <th className="text-left p-4 font-medium text-foreground">Data</th>
               <th className="text-left p-4 font-medium text-foreground">Opis</th>
-              <th className="text-left p-4 font-medium text-foreground">Kategoria</th>
+              <th className="text-left p-4 font-medium text-foreground">Data</th>
               <th className="text-left p-4 font-medium text-foreground">Konto</th>
+              <th className="text-left p-4 font-medium text-foreground">Kategoria</th>
               <th className="text-right p-4 font-medium text-foreground">Kwota</th>
             </tr>
           </thead>
@@ -26,14 +26,11 @@ export function TransactionTable({ transactions, accounts, className = "" }: Tra
               const account = accounts.find(acc => acc.id === transaction.accountId);
               return (
                 <tr key={transaction.id} className="border-b border-border">
-                  <td className="p-4 text-foreground">
-                    {new Date(transaction.date).toLocaleDateString('pl-PL')}
-                  </td>
                   <td className="p-4 text-foreground font-medium">
                     {transaction.description}
                   </td>
-                  <td className="p-4 text-secondary">
-                    {transaction.category}
+                  <td className="p-4 text-foreground">
+                    {new Date(transaction.date).toLocaleDateString('pl-PL')}
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
@@ -45,6 +42,9 @@ export function TransactionTable({ transactions, accounts, className = "" }: Tra
                         {account?.name || 'Nieznane konto'}
                       </span>
                     </div>
+                  </td>
+                  <td className="p-4 text-secondary">
+                    {transaction.category}
                   </td>
                   <td className="p-4 text-right">
                     <span className={`font-semibold ${

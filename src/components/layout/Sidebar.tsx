@@ -161,7 +161,9 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
-          {navigation.map((item) => {
+          {navigation
+            .filter((item) => !['/cashflow', '/reports', '/guide'].includes(item.href))
+            .map((item) => {
             const isActive = pathname === item.href;
             return (
               <li key={item.name}>

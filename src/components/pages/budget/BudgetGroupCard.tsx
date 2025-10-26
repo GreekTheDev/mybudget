@@ -5,6 +5,8 @@ import { formatCurrency } from '@/lib/utils';
 import { BudgetProgressBar } from './BudgetProgressBar';
 import { AddCategoryForm } from './AddCategoryForm';
 import { BudgetGroupMenu } from './BudgetGroupMenu';
+import { EditCategoryForm } from './EditCategoryForm';
+import { DeleteCategoryDialog } from './DeleteCategoryDialog';
 import { BudgetGroup } from '@/lib/types';
 import {
   Drawer,
@@ -12,7 +14,10 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  DrawerFooter,
+  DrawerClose,
 } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
 
 interface BudgetGroupCardProps {
   group: BudgetGroup;
@@ -55,10 +60,7 @@ export function BudgetGroupCard({
       className="border border-border rounded-lg p-6 cursor-pointer hover:bg-opacity-80 transition-colors"
     >
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <h3 className="text-lg font-medium text-foreground">{group.name}</h3>
-          <BudgetGroupMenu group={group} />
-        </div>
+        <h3 className="text-lg font-medium text-foreground">{group.name}</h3>
         <div className="text-right">
           <p className="text-sm text-secondary">Wydano / Zaplanowano</p>
           <p className="font-semibold text-foreground">
@@ -113,13 +115,11 @@ export function BudgetGroupCard({
           </DrawerHeader>
           <div className="px-4 pb-4">
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-right">
-                  <p className="text-sm text-secondary">Wydano / Zaplanowano</p>
-                  <p className="font-semibold text-foreground">
-                    {formatCurrency(totalSpent)} / {formatCurrency(totalPlanned)}
-                  </p>
-                </div>
+              <div className="text-right mb-3">
+                <p className="text-sm text-secondary">Wydano / Zaplanowano</p>
+                <p className="font-semibold text-foreground">
+                  {formatCurrency(totalSpent)} / {formatCurrency(totalPlanned)}
+                </p>
               </div>
               
               {totalPlanned > 0 && (
@@ -156,28 +156,124 @@ export function BudgetGroupCard({
 
 // Component to display categories within a group
 function BudgetCategoryList({ categories, groupId }: { categories: BudgetGroup['categories']; groupId: string }) {
+  const [selectedCategory, setSelectedCategory] = useState<BudgetGroup['categories'][0] | null>(null);
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [pressTimer, setPressTimer] = useState<NodeJS.Timeout | null>(null);
+
+  const handleTouchStart = (category: BudgetGroup['categories'][0]) => {
+    const timer = setTimeout(() => {
+      setSelectedCategory(category);
+      setActionSheetOpen(true);
+    }, 500); // 500ms long press
+    setPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      setPressTimer(null);
+    }
+  };
+
+  const handleEdit = () => {
+    setActionSheetOpen(false);
+    setEditOpen(true);
+  };
+
+  const handleDelete = () => {
+    setActionSheetOpen(false);
+    setDeleteOpen(true);
+  };
+
   return (
-    <div className="pt-4 border-t border-border">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-medium text-foreground">Kategorie</p>
-        <AddCategoryForm groupId={groupId} />
-      </div>
-      {categories.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-4">
-          Brak kategorii w tej grupie
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between rounded pb-1">
-              <span className="text-sm text-foreground">{category.name}</span>
-              <span className="text-sm text-secondary">
-                {formatCurrency(category.spent)} / {formatCurrency(category.limit)}
-              </span>
-            </div>
-          ))}
+    <>
+      <div className="pt-4 border-t border-border">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-foreground">Kategorie</p>
+          <AddCategoryForm groupId={groupId} />
         </div>
+        {categories.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Brak kategorii w tej grupie
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {categories.map((category) => (
+              <div 
+                key={category.id} 
+                className="flex items-center justify-between rounded pb-1 active:bg-accent transition-colors"
+                onTouchStart={() => handleTouchStart(category)}
+                onTouchEnd={handleTouchEnd}
+                onTouchMove={handleTouchEnd}
+                onMouseDown={() => handleTouchStart(category)}
+                onMouseUp={handleTouchEnd}
+                onMouseLeave={handleTouchEnd}
+              >
+                <span className="text-sm text-foreground">{category.name}</span>
+                <span className="text-sm text-secondary">
+                  {formatCurrency(category.spent)} / {formatCurrency(category.limit)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Action Drawer for Category Options */}
+      <Drawer open={actionSheetOpen} onOpenChange={setActionSheetOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{selectedCategory?.name}</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4 space-y-2 flex flex-col">
+            <Button 
+              variant="outline" 
+              className=""
+              onClick={handleEdit}
+            >
+              Edytuj kategorię
+            </Button>
+            <Button 
+              variant="outline" 
+              className="text-white bg-red-500"
+              onClick={handleDelete}
+            >
+              Usuń kategorię
+            </Button>
+          </div>
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline" className="w-full">
+                Anuluj
+              </Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Edit Category Form */}
+      {selectedCategory && (
+        <EditCategoryForm
+          groupId={groupId}
+          category={selectedCategory}
+          isOpen={editOpen}
+          onOpenChange={setEditOpen}
+          triggerButton={null}
+        />
       )}
-    </div>
+
+      {/* Delete Category Dialog */}
+      {selectedCategory && (
+        <DeleteCategoryDialog
+          groupId={groupId}
+          category={selectedCategory}
+          isOpen={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          triggerButton={null}
+        />
+      )}
+    </>
   );
 }

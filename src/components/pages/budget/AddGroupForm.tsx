@@ -26,7 +26,7 @@ export function AddGroupForm() {
       defaultValues={{ name: '' }}
       onSubmit={handleSubmit}
       triggerButton={
-        <Button>
+        <Button className='text-white'>
           Dodaj grupę
         </Button>
       }

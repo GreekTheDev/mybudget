@@ -10,15 +10,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { EditGroupForm } from './EditGroupForm';
-import { DeleteGroupDialog } from './DeleteGroupDialog';
+import { EditCategoryForm } from './EditCategoryForm';
+import { DeleteCategoryDialog } from './DeleteCategoryDialog';
 import { BudgetGroup } from '@/lib/types';
 
-interface BudgetGroupMenuProps {
-  group: BudgetGroup;
+interface CategoryMenuProps {
+  groupId: string;
+  category: BudgetGroup['categories'][0];
 }
 
-export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
+export function CategoryMenu({ groupId, category }: CategoryMenuProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -43,7 +44,7 @@ export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Otwórz menu grupy</span>
+            <span className="sr-only">Otwórz menu kategorii</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40 bg-white dark:bg-gray-950">
@@ -64,16 +65,18 @@ export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
       </DropdownMenu>
 
       {/* Edit Dialog */}
-      <EditGroupForm
-        group={group}
+      <EditCategoryForm
+        groupId={groupId}
+        category={category}
         isOpen={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         triggerButton={null}
       />
 
       {/* Delete Dialog */}
-      <DeleteGroupDialog
-        group={group}
+      <DeleteCategoryDialog
+        groupId={groupId}
+        category={category}
         isOpen={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         triggerButton={null}
