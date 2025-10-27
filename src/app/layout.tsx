@@ -7,6 +7,8 @@ import MobileNavbar from "@/components/layout/MobileNavbar";
 import Providers from "@/components/layout/Providers";
 import { Toaster } from "@/components/ui/sonner";
 
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
