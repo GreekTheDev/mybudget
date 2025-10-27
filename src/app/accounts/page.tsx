@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Account, Transaction } from '@/lib/types';
+import { Account } from '@/lib/types';
 import { 
   AccountDetails, 
   AccountLayout,

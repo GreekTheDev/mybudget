@@ -152,9 +152,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
 
     if (accounts) {
-      const transformedAccounts: Account[] = accounts.map(acc => {
+      const transformedAccounts: Account[] = accounts.map((acc: { 
+        id: string; 
+        name: string; 
+        balance: number; 
+        account_types: { name: string } | null 
+      }) => {
         // Map Supabase name back to AccountType
-        const typeName = (acc.account_types as any)?.name || 'Konto bieżące';
+        const accountTypes = acc.account_types
+        const typeName = accountTypes?.name || 'Konto bieżące';
         let accountType: AccountType = 'checking';
         
         // Find matching type
@@ -181,6 +187,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   // Load accounts from Supabase on mount
   useEffect(() => {
     loadAccounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addAccount = async (name: string, accountType: AccountType, balance: number) => {
@@ -204,15 +211,17 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const accountTypeId = (accountTypeData as { id: string }).id;
+
     // Insert account
     const { data, error } = await supabase
       .from('accounts')
       .insert({
         user_id: user.id,
         name: name,
-        account_type_id: accountTypeData.id,
+        account_type_id: accountTypeId,
         balance: balance,
-      })
+      } as never)
       .select()
       .single();
 
@@ -222,11 +231,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
 
     if (data) {
+      const accountData = data as { id: string; name: string; balance: number };
       const newAccount: Account = {
-        id: data.id,
-        name: data.name,
+        id: accountData.id,
+        name: accountData.name,
         type: accountType,
-        balance: Number(data.balance),
+        balance: Number(accountData.balance),
         color: getAccountTypeColor(accountType),
       };
       dispatch({ type: 'ADD_ACCOUNT_SUCCESS', payload: { account: newAccount } });
@@ -247,13 +257,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const accountTypeId = (accountTypeData as { id: string }).id;
+
     // Update in database
     const { error } = await supabase
       .from('accounts')
       .update({ 
         name,
-        account_type_id: accountTypeData.id 
-      })
+        account_type_id: accountTypeId 
+      } as never)
       .eq('id', id);
 
     if (error) {
@@ -285,7 +297,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     // Update in database
     const { error } = await supabase
       .from('accounts')
-      .update({ balance })
+      .update({ balance } as never)
       .eq('id', id);
 
     if (error) {

@@ -59,7 +59,7 @@ const mockProjections: CashFlowProjection[] = [
 
 export default function CashFlow() {
   const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'monthly' | 'projection'>('daily');
-  const [selectedMonth, setSelectedMonth] = useState('2024-01');
+  // Removed selectedMonth state - not used in the current implementation
 
   // Check for hash in URL to set initial tab
   useEffect(() => {

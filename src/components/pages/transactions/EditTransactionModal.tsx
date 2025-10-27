@@ -2,13 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { DrawerForm } from '@/components/ui/drawer-form';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Account, BudgetGroup, Transaction } from '@/lib/types';
-import { Trash2 } from 'lucide-react';
-import { DeleteTransactionDialog } from './DeleteTransactionDialog';
 
 interface EditTransactionFormData extends Record<string, unknown> {
   description: string;
@@ -39,7 +36,6 @@ export function EditTransactionModal({
 }: EditTransactionModalProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<string>(transaction.budgetGroupId || '');
   const [availableCategories, setAvailableCategories] = useState<{ id: string; name: string }[]>([]);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (selectedGroupId) {
@@ -66,19 +62,8 @@ export function EditTransactionModal({
   return (
     <>
       <DrawerForm<EditTransactionFormData>
-        title={
-          <div className="flex items-center justify-between w-full pr-8">
-            <span>Edytuj transakcję</span>
-            <button
-              type="button"
-              onClick={() => setShowDeleteDialog(true)}
-              className="p-2 rounded-md hover:bg-destructive/10 transition-colors"
-            >
-              <Trash2 className="h-5 w-5 text-destructive" />
-            </button>
-          </div>
-        }
-        defaultValues={{ 
+        title="Edytuj transakcję"
+        defaultValues={{
           description: transaction.description, 
           amount: transaction.amount,
           type: transaction.type,
@@ -261,13 +246,6 @@ export function EditTransactionModal({
           </>
         )}
       </DrawerForm>
-
-      <DeleteTransactionDialog
-        transaction={transaction}
-        isOpen={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onDeleted={onClose}
-      />
     </>
   );
 }

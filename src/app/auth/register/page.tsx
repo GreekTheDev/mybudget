@@ -35,7 +35,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       })
@@ -51,10 +51,11 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push('/auth/login')
       }, 2000)
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Wystąpił błąd podczas rejestracji'
       setMessage({
         type: 'error',
-        text: error.message || 'Wystąpił błąd podczas rejestracji',
+        text: errorMessage,
       })
     } finally {
       setIsLoading(false)

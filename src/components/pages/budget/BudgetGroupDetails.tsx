@@ -9,10 +9,9 @@ import { BudgetGroup } from '@/lib/types';
 
 interface BudgetGroupDetailsProps {
   group: BudgetGroup | null;
-  onAddCategory?: () => void;
 }
 
-export function BudgetGroupDetails({ group, onAddCategory }: BudgetGroupDetailsProps) {
+export function BudgetGroupDetails({ group }: BudgetGroupDetailsProps) {
   if (!group) {
     return (
       <div className="border border-border rounded-lg p-6">

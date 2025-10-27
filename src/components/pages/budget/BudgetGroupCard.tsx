@@ -25,7 +25,6 @@ interface BudgetGroupCardProps {
   layoutMode: 'desktop' | 'tablet' | 'mobile';
   onClick: () => void;
   onToggleExpansion?: () => void;
-  onAddCategory?: () => void;
 }
 
 export function BudgetGroupCard({

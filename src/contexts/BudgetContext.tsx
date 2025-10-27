@@ -200,10 +200,14 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
 
     // Transform data to match our state structure
     if (groups) {
-      const transformedGroups: BudgetGroup[] = groups.map(group => ({
+      const transformedGroups: BudgetGroup[] = groups.map((group: {
+        id: string;
+        name: string;
+        budget_categories: { id: string; name: string; planned_limit: number; spent: number | null }[] | null
+      }) => ({
         id: group.id,
         name: group.name,
-        categories: (group.budget_categories || []).map((cat: any) => ({
+        categories: (group.budget_categories || []).map((cat: { id: string; name: string; planned_limit: number; spent: number | null }) => ({
           id: cat.id,
           name: cat.name,
           limit: Number(cat.planned_limit),
@@ -220,6 +224,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
   // Load data from Supabase on mount
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addGroup = async (name: string) => {
@@ -237,7 +242,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
       .insert({
         user_id: user.id,
         name: name,
-      })
+      } as never)
       .select()
       .single();
 
@@ -247,10 +252,11 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
     }
 
     if (data) {
+      const groupData = data as { id: string; name: string };
       // Update local state with the ID from database
       const newGroup: BudgetGroup = {
-        id: data.id,
-        name: data.name,
+        id: groupData.id,
+        name: groupData.name,
         categories: [],
       };
       dispatch({ type: 'ADD_GROUP_SUCCESS', payload: { group: newGroup } });
@@ -261,7 +267,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
     // Update in database
     const { error } = await supabase
       .from('budget_groups')
-      .update({ name })
+      .update({ name } as never)
       .eq('id', id);
 
     if (error) {
@@ -297,7 +303,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
         budget_group_id: groupId,
         name: name,
         planned_limit: limit,
-      })
+      } as never)
       .select()
       .single();
 
@@ -307,11 +313,12 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
     }
 
     if (data) {
+      const categoryData = data as { id: string; name: string; planned_limit: number };
       // Update local state with database ID
       const newCategory: BudgetCategory = {
-        id: data.id,
-        name: data.name,
-        limit: Number(data.planned_limit),
+        id: categoryData.id,
+        name: categoryData.name,
+        limit: Number(categoryData.planned_limit),
         spent: 0,
         color: getRandomColor(),
       };
@@ -330,7 +337,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
       .update({ 
         name,
         planned_limit: limit 
-      })
+      } as never)
       .eq('id', categoryId);
 
     if (error) {

@@ -16,11 +16,6 @@ function BudgetContent() {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [layoutMode, setLayoutMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
-  const handleAddCategory = (groupId?: string) => {
-    // This will be handled by the AddCategoryForm component
-    console.log('Add category for group:', groupId);
-  };
-
   const toggleGroupExpansion = (groupId: string) => {
     setExpandedGroups(prev => {
       const newSet = new Set(prev);
@@ -125,7 +120,6 @@ function BudgetContent() {
                     layoutMode={layoutMode}
                     onClick={() => setSelectedGroup(group)}
                     onToggleExpansion={() => toggleGroupExpansion(group.id)}
-                    onAddCategory={() => handleAddCategory(group.id)}
                   />
                 ))}
               </div>
@@ -137,7 +131,6 @@ function BudgetContent() {
             <h2 className="text-xl font-semibold mb-4 text-foreground">Szczegóły</h2>
             <BudgetGroupDetails 
               group={selectedGroup}
-              onAddCategory={() => handleAddCategory(selectedGroup?.id)}
             />
           </div>
         </BudgetLayout>

@@ -28,20 +28,12 @@ export default function Settings() {
     };
     
     loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFABPositionChange = (newPosition: FABPosition) => {
     setFabPosition(newPosition);
     updateFABPosition(newPosition);
-  };
-
-  const getFABPositionLabel = (position: FABPosition) => {
-    switch (position) {
-      case 'left': return 'Lewy dolny róg';
-      case 'right': return 'Prawy dolny róg';
-      case 'disabled': return 'Ukryty';
-      default: return position;
-    }
   };
 
   const handleLogout = async () => {

@@ -23,7 +23,7 @@ export default function LoginPage() {
     setMessage(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -40,10 +40,11 @@ export default function LoginPage() {
         router.push('/budget')
         router.refresh()
       }, 500)
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Błędny email lub hasło'
       setMessage({
         type: 'error',
-        text: error.message || 'Błędny email lub hasło',
+        text: errorMessage,
       })
     } finally {
       setIsLoading(false)

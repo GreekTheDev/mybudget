@@ -42,11 +42,6 @@ function transactionReducer(state: TransactionState, action: TransactionAction):
       };
     }
 
-    case 'ADD_TRANSACTION': {
-      // Temporary local update (will be replaced by ADD_TRANSACTION_SUCCESS)
-      return state;
-    }
-
     case 'EDIT_TRANSACTION': {
       return {
         ...state,
@@ -71,10 +66,6 @@ function transactionReducer(state: TransactionState, action: TransactionAction):
       return state;
   }
 }
-
-const initialState: TransactionState = {
-  transactions: [],
-};
 
 interface TransactionProviderProps {
   children: ReactNode;
@@ -123,23 +114,37 @@ export function TransactionProvider({ children, initialTransactions = [] }: Tran
       }
 
       if (transactions) {
-        const transformedTransactions: Transaction[] = transactions.map(t => ({
-          id: t.id,
-          description: t.description,
-          amount: Number(t.amount),
-          type: t.type as 'income' | 'expense',
-          category: (t.budget_categories as any)?.name || '',
-          date: new Date(t.date),
-          accountId: t.account_id,
-          budgetGroupId: t.budget_group_id || undefined,
-          budgetCategoryId: t.budget_category_id || undefined,
-        }));
+        const transformedTransactions: Transaction[] = transactions.map((t: {
+          id: string;
+          description: string;
+          amount: number;
+          type: string;
+          date: string;
+          account_id: string;
+          budget_group_id: string | null;
+          budget_category_id: string | null;
+          budget_categories: { name: string } | null;
+        }) => {
+          const budgetCategories = t.budget_categories
+          return {
+            id: t.id,
+            description: t.description,
+            amount: Number(t.amount),
+            type: t.type as 'income' | 'expense',
+            category: budgetCategories?.name || '',
+            date: new Date(t.date),
+            accountId: t.account_id,
+            budgetGroupId: t.budget_group_id || undefined,
+            budgetCategoryId: t.budget_category_id || undefined,
+          }
+        });
 
         dispatch({ type: 'LOAD_TRANSACTIONS', payload: { transactions: transformedTransactions } });
       }
     };
 
     loadTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addTransaction = async (data: Omit<Transaction, 'id'>) => {
@@ -162,7 +167,7 @@ export function TransactionProvider({ children, initialTransactions = [] }: Tran
         account_id: data.accountId,
         budget_group_id: data.budgetGroupId || null,
         budget_category_id: data.budgetCategoryId || null,
-      })
+      } as never)
       .select(`
         id,
         description,
@@ -181,16 +186,26 @@ export function TransactionProvider({ children, initialTransactions = [] }: Tran
     }
 
     if (newTransaction) {
+      const transactionData = newTransaction as {
+        id: string;
+        description: string;
+        amount: number;
+        type: string;
+        date: string;
+        account_id: string;
+        budget_group_id: string | null;
+        budget_category_id: string | null;
+      };
       const transaction: Transaction = {
-        id: newTransaction.id,
-        description: newTransaction.description,
-        amount: Number(newTransaction.amount),
-        type: newTransaction.type as 'income' | 'expense',
+        id: transactionData.id,
+        description: transactionData.description,
+        amount: Number(transactionData.amount),
+        type: transactionData.type as 'income' | 'expense',
         category: data.category,
-        date: new Date(newTransaction.date),
-        accountId: newTransaction.account_id,
-        budgetGroupId: newTransaction.budget_group_id || undefined,
-        budgetCategoryId: newTransaction.budget_category_id || undefined,
+        date: new Date(transactionData.date),
+        accountId: transactionData.account_id,
+        budgetGroupId: transactionData.budget_group_id || undefined,
+        budgetCategoryId: transactionData.budget_category_id || undefined,
       };
       dispatch({ type: 'ADD_TRANSACTION_SUCCESS', payload: { transaction } });
       
@@ -204,7 +219,15 @@ export function TransactionProvider({ children, initialTransactions = [] }: Tran
 
   const editTransaction = async (id: string, data: Partial<Transaction>) => {
     // Build update object
-    const updateData: any = {};
+    const updateData: {
+      description?: string
+      amount?: number
+      type?: string
+      date?: string
+      account_id?: string
+      budget_group_id?: string | null
+      budget_category_id?: string | null
+    } = {}
     if (data.description !== undefined) updateData.description = data.description;
     if (data.amount !== undefined) updateData.amount = data.amount;
     if (data.type !== undefined) updateData.type = data.type;
@@ -216,7 +239,7 @@ export function TransactionProvider({ children, initialTransactions = [] }: Tran
     // Update in database
     const { error } = await supabase
       .from('transactions')
-      .update(updateData)
+      .update(updateData as never)
       .eq('id', id);
 
     if (error) {

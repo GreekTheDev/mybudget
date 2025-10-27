@@ -1,4 +1,4 @@
-import { Account, Subscription } from '@/lib/types';
+import { Account } from '@/lib/types';
 
 interface SubscriptionFiltersProps {
   showFilters: boolean;
