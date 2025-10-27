@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { BudgetState, BudgetAction, BudgetGroup, BudgetCategory } from '@/lib/types';
+import { createClient } from '@/utils/supabase/client';
 
 interface BudgetContextType {
   state: BudgetState;
@@ -12,6 +13,7 @@ interface BudgetContextType {
   addCategory: (groupId: string, name: string, limit: number) => void;
   editCategory: (groupId: string, categoryId: string, name: string, limit: number) => void;
   deleteCategory: (groupId: string, categoryId: string) => void;
+  refreshBudgets: () => Promise<void>;
 }
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -41,6 +43,20 @@ const getRandomColor = (): string => {
 
 function budgetReducer(state: BudgetState, action: BudgetAction): BudgetState {
   switch (action.type) {
+    case 'LOAD_GROUPS': {
+      return {
+        ...state,
+        groups: action.payload.groups || [],
+      };
+    }
+
+    case 'ADD_GROUP_SUCCESS': {
+      return {
+        ...state,
+        groups: [...state.groups, action.payload.group],
+      };
+    }
+
     case 'ADD_GROUP': {
       const newGroup: BudgetGroup = {
         id: nanoid(),
@@ -68,6 +84,17 @@ function budgetReducer(state: BudgetState, action: BudgetAction): BudgetState {
       return {
         ...state,
         groups: state.groups.filter(group => group.id !== action.payload.id),
+      };
+    }
+
+    case 'ADD_CATEGORY_SUCCESS': {
+      return {
+        ...state,
+        groups: state.groups.map(group =>
+          group.id === action.payload.groupId
+            ? { ...group, categories: [...group.categories, action.payload.category] }
+            : group
+        ),
       };
     }
 
@@ -139,28 +166,195 @@ interface BudgetProviderProps {
 
 export function BudgetProvider({ children }: BudgetProviderProps) {
   const [state, dispatch] = useReducer(budgetReducer, initialState);
+  const supabase = createClient();
 
-  const addGroup = (name: string) => {
-    dispatch({ type: 'ADD_GROUP', payload: { name } });
+  // Shared function to load budgets
+  const loadData = async () => {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.log('No user logged in');
+      return;
+    }
+
+    // Load budget groups with categories
+    const { data: groups, error: groupsError } = await supabase
+      .from('budget_groups')
+      .select(`
+        id,
+        name,
+        budget_categories (
+          id,
+          name,
+          planned_limit,
+          spent
+        )
+      `)
+      .order('created_at', { ascending: true });
+
+    if (groupsError) {
+      console.error('Error loading groups:', groupsError);
+      return;
+    }
+
+    // Transform data to match our state structure
+    if (groups) {
+      const transformedGroups: BudgetGroup[] = groups.map(group => ({
+        id: group.id,
+        name: group.name,
+        categories: (group.budget_categories || []).map((cat: any) => ({
+          id: cat.id,
+          name: cat.name,
+          limit: Number(cat.planned_limit),
+          spent: Number(cat.spent || 0),
+          color: getRandomColor(),
+        })),
+      }));
+
+      // Load all groups at once
+      dispatch({ type: 'LOAD_GROUPS', payload: { groups: transformedGroups } });
+    }
   };
 
-  const editGroup = (id: string, name: string) => {
+  // Load data from Supabase on mount
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const addGroup = async (name: string) => {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error('No user logged in');
+      return;
+    }
+
+    // Insert into database
+    const { data, error } = await supabase
+      .from('budget_groups')
+      .insert({
+        user_id: user.id,
+        name: name,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding group:', error);
+      return;
+    }
+
+    if (data) {
+      // Update local state with the ID from database
+      const newGroup: BudgetGroup = {
+        id: data.id,
+        name: data.name,
+        categories: [],
+      };
+      dispatch({ type: 'ADD_GROUP_SUCCESS', payload: { group: newGroup } });
+    }
+  };
+
+  const editGroup = async (id: string, name: string) => {
+    // Update in database
+    const { error } = await supabase
+      .from('budget_groups')
+      .update({ name })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating group:', error);
+      return;
+    }
+
+    // Update local state
     dispatch({ type: 'EDIT_GROUP', payload: { id, name } });
   };
 
-  const deleteGroup = (id: string) => {
+  const deleteGroup = async (id: string) => {
+    // Delete from database (CASCADE will delete categories)
+    const { error } = await supabase
+      .from('budget_groups')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting group:', error);
+      return;
+    }
+
+    // Update local state
     dispatch({ type: 'DELETE_GROUP', payload: { id } });
   };
 
-  const addCategory = (groupId: string, name: string, limit: number) => {
-    dispatch({ type: 'ADD_CATEGORY', payload: { groupId, name, limit } });
+  const addCategory = async (groupId: string, name: string, limit: number) => {
+    // Insert into database
+    const { data, error } = await supabase
+      .from('budget_categories')
+      .insert({
+        budget_group_id: groupId,
+        name: name,
+        planned_limit: limit,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding category:', error);
+      return;
+    }
+
+    if (data) {
+      // Update local state with database ID
+      const newCategory: BudgetCategory = {
+        id: data.id,
+        name: data.name,
+        limit: Number(data.planned_limit),
+        spent: 0,
+        color: getRandomColor(),
+      };
+      
+      dispatch({ 
+        type: 'ADD_CATEGORY_SUCCESS', 
+        payload: { groupId, category: newCategory } 
+      });
+    }
   };
 
-  const editCategory = (groupId: string, categoryId: string, name: string, limit: number) => {
+  const editCategory = async (groupId: string, categoryId: string, name: string, limit: number) => {
+    // Update in database
+    const { error } = await supabase
+      .from('budget_categories')
+      .update({ 
+        name,
+        planned_limit: limit 
+      })
+      .eq('id', categoryId);
+
+    if (error) {
+      console.error('Error updating category:', error);
+      return;
+    }
+
+    // Update local state
     dispatch({ type: 'EDIT_CATEGORY', payload: { groupId, categoryId, name, limit } });
   };
 
-  const deleteCategory = (groupId: string, categoryId: string) => {
+  const deleteCategory = async (groupId: string, categoryId: string) => {
+    // Delete from database
+    const { error } = await supabase
+      .from('budget_categories')
+      .delete()
+      .eq('id', categoryId);
+
+    if (error) {
+      console.error('Error deleting category:', error);
+      return;
+    }
+
+    // Update local state
     dispatch({ type: 'DELETE_CATEGORY', payload: { groupId, categoryId } });
   };
 
@@ -172,6 +366,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
     addCategory,
     editCategory,
     deleteCategory,
+    refreshBudgets: loadData,
   };
 
   return (

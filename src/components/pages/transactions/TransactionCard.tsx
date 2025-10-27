@@ -6,11 +6,15 @@ interface TransactionCardProps {
   transaction: Transaction;
   account?: Account;
   className?: string;
+  onClick?: () => void;
 }
 
-export function TransactionCard({ transaction, account, className = "" }: TransactionCardProps) {
+export function TransactionCard({ transaction, account, className = "", onClick }: TransactionCardProps) {
   return (
-    <div className={`flex items-center justify-between p-3 border border-border rounded-lg ${className}`}>
+    <div 
+      className={`flex items-center justify-between p-3 border border-border rounded-lg ${onClick ? 'cursor-pointer hover:bg-accent/50 transition-colors' : ''} ${className}`}
+      onClick={onClick}
+    >
       <div className="flex items-center gap-3">
         {/* Category Icon */}
         <CategoryIcon category={transaction.category} size="md" />

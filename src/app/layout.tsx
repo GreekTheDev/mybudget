@@ -4,7 +4,8 @@ import "./globals.css";
 import ConditionalTopBar from "@/components/layout/ConditionalTopBar";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileNavbar from "@/components/layout/MobileNavbar";
-import FloatingActionButton from "@/components/layout/FloatingActionButton";
+import Providers from "@/components/layout/Providers";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,17 +47,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex h-screen">
-          <Sidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <ConditionalTopBar />
-            <main className="flex-1 overflow-auto pb-42 md:pb-0">
-              {children}
-            </main>
+        <Providers>
+          <div className="flex h-screen">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <ConditionalTopBar />
+              <main className="flex-1 overflow-auto pb-42 md:pb-0">
+                {children}
+              </main>
+            </div>
+            <MobileNavbar />
           </div>
-          <MobileNavbar />
-          <FloatingActionButton />
-        </div>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

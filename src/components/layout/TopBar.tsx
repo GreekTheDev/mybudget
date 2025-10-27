@@ -1,50 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Transaction, FinancialSummary } from '@/lib/types';
-import { calculateFinancialSummary, formatCurrency, cn } from '@/lib/utils';
-
-// Mock data for testing - in real app this would come from your data source
-const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    amount: 5000,
-    type: 'income',
-    category: 'Wynagrodzenie',
-    description: 'Wypłata',
-    date: new Date(),
-    accountId: '1',
-  },
-  {
-    id: '2',
-    amount: 1200,
-    type: 'expense',
-    category: 'Czynsz',
-    description: 'Opłata za mieszkanie',
-    date: new Date(),
-    accountId: '1',
-  },
-  {
-    id: '3',
-    amount: 300,
-    type: 'expense',
-    category: 'Żywność',
-    description: 'Zakupy spożywcze',
-    date: new Date(),
-    accountId: '1',
-  },
-  {
-    id: '4',
-    amount: 150,
-    type: 'expense',
-    category: 'Transport',
-    description: 'Bilety komunikacji miejskiej',
-    date: new Date(),
-    accountId: '1',
-  },
-];
+import { FinancialSummary } from '@/lib/types';
+import { formatCurrency, cn } from '@/lib/utils';
+import { useAccountContext } from '@/contexts/AccountContext';
 
 export default function TopBar() {
+  const { state } = useAccountContext();
   const [financialSummary, setFinancialSummary] = useState<FinancialSummary>({
     totalIncome: 0,
     totalExpenses: 0,
@@ -54,10 +16,24 @@ export default function TopBar() {
   });
 
   useEffect(() => {
-    // Calculate financial summary from transactions
-    const summary = calculateFinancialSummary(mockTransactions);
-    setFinancialSummary(summary);
-  }, []);
+    // Calculate total balance from all accounts
+    const totalBalance = state.accounts.reduce((sum, account) => sum + account.balance, 0);
+    
+    // Get current month and year
+    const now = new Date();
+    const monthNames = [
+      'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
+      'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
+    ];
+    
+    setFinancialSummary({
+      totalIncome: 0, // TODO: Calculate from transactions when implemented
+      totalExpenses: 0, // TODO: Calculate from transactions when implemented
+      balance: totalBalance,
+      month: monthNames[now.getMonth()],
+      year: now.getFullYear(),
+    });
+  }, [state.accounts]);
 
   return (
     <header 

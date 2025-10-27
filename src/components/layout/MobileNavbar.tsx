@@ -62,6 +62,11 @@ const navigation: NavItem[] = [
 export default function MobileNavbar() {
   const pathname = usePathname();
 
+  // Hide mobile navbar on auth pages
+  if (pathname?.startsWith('/auth')) {
+    return null;
+  }
+
   return (
     <nav 
       className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border z-50 h-20"

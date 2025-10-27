@@ -6,12 +6,26 @@ export interface Transaction {
   description: string;
   date: Date;
   accountId: string;
+  budgetGroupId?: string;
+  budgetCategoryId?: string;
 }
+
+export type AccountType = 
+  | 'cash' | 'checking'
+  | 'savings' | 'term_deposit'
+  | 'credit' | 'bnpl' | 'loan' | 'mortgage'
+  | 'investment' | 'brokerage' | 'pension' | 'crypto' | 'ewallet' | 'prepaid';
+
+export type AccountCategory = 
+  | 'current_accounts'
+  | 'savings_goals'
+  | 'cards_credits'
+  | 'investments_tech';
 
 export interface Account {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'credit' | 'investment';
+  type: AccountType;
   balance: number;
   color: string;
 }
@@ -152,10 +166,13 @@ export interface BudgetState {
 }
 
 export type BudgetAction =
+  | { type: 'LOAD_GROUPS'; payload: { groups: BudgetGroup[] } }
   | { type: 'ADD_GROUP'; payload: { name: string } }
+  | { type: 'ADD_GROUP_SUCCESS'; payload: { group: BudgetGroup } }
   | { type: 'EDIT_GROUP'; payload: { id: string; name: string } }
   | { type: 'DELETE_GROUP'; payload: { id: string } }
   | { type: 'ADD_CATEGORY'; payload: { groupId: string; name: string; limit: number } }
+  | { type: 'ADD_CATEGORY_SUCCESS'; payload: { groupId: string; category: BudgetCategory } }
   | { type: 'EDIT_CATEGORY'; payload: { groupId: string; categoryId: string; name: string; limit: number } }
   | { type: 'DELETE_CATEGORY'; payload: { groupId: string; categoryId: string } };
 

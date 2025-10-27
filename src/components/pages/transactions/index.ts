@@ -1,6 +1,9 @@
 export { AddTransactionModal } from './AddTransactionModal';
+export { EditTransactionModal } from './EditTransactionModal';
+export { DeleteTransactionDialog } from './DeleteTransactionDialog';
 export { CategoryIcon } from './CategoryIcon';
 export { TransactionCard } from './TransactionCard';
 export { TransactionFilters } from './TransactionFilters';
 export { TransactionList } from './TransactionList';
 export { TransactionTable } from './TransactionTable';
+export { TransactionMenu } from './TransactionMenu';

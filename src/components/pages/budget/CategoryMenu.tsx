@@ -47,7 +47,7 @@ export function CategoryMenu({ groupId, category }: CategoryMenuProps) {
             <span className="sr-only">Otwórz menu kategorii</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40 bg-white dark:bg-gray-950">
+        <DropdownMenuContent align="end" className="w-40 !bg-white dark:!bg-neutral-900">
           <DropdownMenuItem onClick={handleEditClick} className="cursor-pointer">
             <Edit className="mr-2 h-4 w-4" />
             Edytuj

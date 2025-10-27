@@ -113,6 +113,11 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
 
+  // Hide sidebar on auth pages
+  if (pathname?.startsWith('/auth')) {
+    return null;
+  }
+
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };

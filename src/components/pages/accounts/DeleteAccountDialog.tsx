@@ -13,21 +13,21 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useBudgetContext } from '@/contexts/BudgetContext';
-import { BudgetGroup } from '@/lib/types';
+import { useAccountContext } from '@/contexts/AccountContext';
+import { Account } from '@/lib/types';
 
-interface DeleteGroupDialogProps {
-  group: BudgetGroup;
+interface DeleteAccountDialogProps {
+  account: Account;
   triggerButton?: React.ReactNode;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-export function DeleteGroupDialog({ group, triggerButton, isOpen, onOpenChange }: DeleteGroupDialogProps) {
-  const { deleteGroup } = useBudgetContext();
+export function DeleteAccountDialog({ account, triggerButton, isOpen, onOpenChange }: DeleteAccountDialogProps) {
+  const { deleteAccount } = useAccountContext();
 
   const handleDelete = () => {
-    deleteGroup(group.id);
+    deleteAccount(account.id);
     onOpenChange?.(false);
   };
 
@@ -50,15 +50,10 @@ export function DeleteGroupDialog({ group, triggerButton, isOpen, onOpenChange }
       )}
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Usunąć grupę budżetową?</AlertDialogTitle>
+          <AlertDialogTitle>Usunąć konto?</AlertDialogTitle>
           <AlertDialogDescription>
-            Czy na pewno chcesz usunąć grupę &ldquo;{group.name}&rdquo;?
-            {group.categories.length > 0 && (
-              <>
-                {' '}Ta grupa zawiera {group.categories.length} {group.categories.length === 1 ? 'kategorię' : 'kategorii'}.
-              </>
-            )}
-            {' '}Ta operacja jest nieodwracalna.
+            Czy na pewno chcesz usunąć konto &ldquo;{account.name}&rdquo;?
+            Ta operacja jest nieodwracalna i usunie wszystkie powiązane transakcje.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -74,7 +69,3 @@ export function DeleteGroupDialog({ group, triggerButton, isOpen, onOpenChange }
     </AlertDialog>
   );
 }
-
-
-
-

@@ -45,3 +45,10 @@ next-env.d.ts
 
 #vscode
 .vscode/
+
+#docs
+docs/
+supabase/migrations/20250127_create_transactions.sql
+supabase/migrations/README_TRANSACTIONS.md
+WARP.md
+hidden.md

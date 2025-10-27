@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { Account, Transaction } from '@/lib/types';
 import { TransactionList } from './TransactionList';
+import { AccountMenu } from './AccountMenu';
+import { getAccountTypeLabel } from '@/lib/accountCategories';
 import {
   Drawer,
   DrawerContent,
@@ -28,14 +30,14 @@ export function AccountCard({
   onToggleExpansion
 }: AccountCardProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const getAccountTypeLabel = (type: string) => {
-    switch (type) {
-      case 'checking': return 'Konto rozliczeniowe';
-      case 'savings': return 'Oszczędności';
-      case 'credit': return 'Karta kredytowa';
-      case 'investment': return 'Inwestycje';
-      default: return type;
+
+  // Helper function for proper Polish plural form
+  const getTransactionLabel = (count: number) => {
+    if (count === 1) return 'transakcja';
+    if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+      return 'transakcje';
     }
+    return 'transakcji';
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -71,7 +73,7 @@ export function AccountCard({
             {formatCurrency(account.balance)}
           </p>
           <p className="text-sm text-secondary">
-            {transactions.length} transakcji
+            {transactions.length} {getTransactionLabel(transactions.length)} w tym miesiącu
           </p>
         </div>
       </div>
@@ -83,7 +85,7 @@ export function AccountCard({
         <div className="pt-4 border-t border-border">
           <TransactionList 
             transactions={transactions}
-            maxItems={3}
+            maxItems={5}
             showHeader={true}
           />
         </div>
@@ -102,13 +104,16 @@ export function AccountCard({
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle className="text-lg flex items-center gap-3">
-              <div 
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: account.color }}
-              />
-              {account.name}
-            </DrawerTitle>
+            <div className="flex items-center justify-between">
+              <DrawerTitle className="text-lg flex items-center gap-3">
+                <div 
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: account.color }}
+                />
+                {account.name}
+              </DrawerTitle>
+              <AccountMenu account={account} />
+            </div>
           </DrawerHeader>
           <div className="px-4 pb-4">
             <div className="mb-4">
@@ -121,7 +126,7 @@ export function AccountCard({
                     {formatCurrency(account.balance)}
                   </p>
                   <p className="text-sm text-secondary">
-                    {transactions.length} transakcji
+                    {transactions.length} {getTransactionLabel(transactions.length)} w tym miesiącu
                   </p>
                 </div>
               </div>

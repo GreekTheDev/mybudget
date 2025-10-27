@@ -1,17 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/hooks/useTheme';
 import { updateFABPosition, getFABPosition } from '@/components/layout/FloatingActionButton';
+import { createClient } from '@/utils/supabase/client';
+import { User } from '@supabase/supabase-js';
+import { LogOut, User as UserIcon } from 'lucide-react';
 
 type FABPosition = 'left' | 'right' | 'disabled';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const [fabPosition, setFabPosition] = useState<FABPosition>('right');
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     setFabPosition(getFABPosition());
+    
+    // Load user data
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    
+    loadUser();
   }, []);
 
   const handleFABPositionChange = (newPosition: FABPosition) => {
@@ -28,12 +44,66 @@ export default function Settings() {
     }
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error logging out:', error);
+        setIsLoggingOut(false);
+        return;
+      }
+      
+      // Redirect to login page
+      router.push('/auth/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 ">
       <div className=" mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-foreground">Ustawienia</h1>
 
         <div className="space-y-6">
+          {/* User Account Section */}
+          <div className="border border-border rounded-lg p-6 bg-muted/30">
+            <h2 className="text-xl font-semibold mb-4 text-foreground">Konto użytkownika</h2>
+            
+            <div className="space-y-4">
+              {/* User Info */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <UserIcon className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">
+                    {user?.email || 'Ładowanie...'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {user ? 'Zalogowany' : 'Sprawdzanie statusu...'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Logout Button */}
+              <div className="pt-2">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut || !user}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{isLoggingOut ? 'Wylogowywanie...' : 'Wyloguj się'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
           {/* Theme Settings */}
           <div className=" border border-border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-foreground">Wygląd</h2>

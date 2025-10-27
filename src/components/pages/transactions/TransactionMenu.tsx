@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,15 +10,29 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { EditGroupForm } from './EditGroupForm';
-import { DeleteGroupDialog } from './DeleteGroupDialog';
-import { BudgetGroup } from '@/lib/types';
+import { DeleteTransactionDialog } from './DeleteTransactionDialog';
+import { Transaction, Account, BudgetGroup } from '@/lib/types';
+import { EditTransactionModal } from './EditTransactionModal';
+import { toast } from 'sonner';
 
-interface BudgetGroupMenuProps {
-  group: BudgetGroup;
+interface EditTransactionFormData {
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  accountId: string;
+  budgetGroupId: string;
+  budgetCategoryId: string;
+  date: Date;
 }
 
-export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
+interface TransactionMenuProps {
+  transaction: Transaction;
+  accounts: Account[];
+  budgetGroups: BudgetGroup[];
+  onEdit: (id: string, data: EditTransactionFormData) => void;
+}
+
+export function TransactionMenu({ transaction, accounts, budgetGroups, onEdit }: TransactionMenuProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -32,6 +46,16 @@ export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
     setDeleteDialogOpen(true);
   };
 
+  const handleEditSave = (id: string, data: EditTransactionFormData) => {
+    onEdit(id, data);
+    setEditDialogOpen(false);
+    toast.success('Transakcja została zaktualizowana');
+  };
+
+  const handleDeleteSuccess = () => {
+    toast.success('Transakcja została usunięta');
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -42,8 +66,8 @@ export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
             className="h-8 w-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Otwórz menu grupy</span>
+            <MoreVertical className="h-4 w-4" />
+            <span className="sr-only">Otwórz menu transakcji</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40 !bg-white dark:!bg-neutral-900">
@@ -63,20 +87,22 @@ export function BudgetGroupMenu({ group }: BudgetGroupMenuProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Edit Dialog */}
-      <EditGroupForm
-        group={group}
+      {/* Edit Modal */}
+      <EditTransactionModal
+        transaction={transaction}
         isOpen={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        triggerButton={null}
+        onClose={() => setEditDialogOpen(false)}
+        onSave={handleEditSave}
+        accounts={accounts}
+        budgetGroups={budgetGroups}
       />
 
       {/* Delete Dialog */}
-      <DeleteGroupDialog
-        group={group}
+      <DeleteTransactionDialog
+        transaction={transaction}
         isOpen={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        triggerButton={null}
+        onDeleted={handleDeleteSuccess}
       />
     </>
   );

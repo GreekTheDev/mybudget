@@ -1,13 +1,26 @@
 import { formatCurrency } from '@/lib/utils';
-import { Transaction, Account } from '@/lib/types';
+import { Transaction, Account, BudgetGroup } from '@/lib/types';
+import { TransactionMenu } from './TransactionMenu';
+
+interface EditTransactionFormData {
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  accountId: string;
+  budgetGroupId: string;
+  budgetCategoryId: string;
+  date: Date;
+}
 
 interface TransactionTableProps {
   transactions: Transaction[];
   accounts: Account[];
+  budgetGroups: BudgetGroup[];
+  onEdit: (id: string, data: EditTransactionFormData) => void;
   className?: string;
 }
 
-export function TransactionTable({ transactions, accounts, className = "" }: TransactionTableProps) {
+export function TransactionTable({ transactions, accounts, budgetGroups, onEdit, className = "" }: TransactionTableProps) {
   return (
     <div className={`hidden lg:block border border-border rounded-lg overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
@@ -19,6 +32,7 @@ export function TransactionTable({ transactions, accounts, className = "" }: Tra
               <th className="text-left p-4 font-medium text-foreground">Konto</th>
               <th className="text-left p-4 font-medium text-foreground">Kategoria</th>
               <th className="text-right p-4 font-medium text-foreground">Kwota</th>
+              <th className="text-right p-4 font-medium text-foreground w-[50px]">Akcje</th>
             </tr>
           </thead>
           <tbody>
@@ -52,6 +66,14 @@ export function TransactionTable({ transactions, accounts, className = "" }: Tra
                     }`}>
                       {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                     </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <TransactionMenu
+                      transaction={transaction}
+                      accounts={accounts}
+                      budgetGroups={budgetGroups}
+                      onEdit={onEdit}
+                    />
                   </td>
                 </tr>
               );

@@ -34,7 +34,6 @@ export function BudgetGroupCard({
   layoutMode,
   onClick,
   onToggleExpansion,
-  onAddCategory
 }: BudgetGroupCardProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 

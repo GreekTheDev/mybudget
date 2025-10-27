@@ -1,127 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { Transaction, Account } from '@/lib/types';
+import { Transaction } from '@/lib/types';
+
+interface EditTransactionFormData {
+  description: string;
+  amount: number;
+  type: 'income' | 'expense';
+  accountId: string;
+  budgetGroupId: string;
+  budgetCategoryId: string;
+  date: Date;
+}
 import { 
   AddTransactionModal,
+  EditTransactionModal,
   TransactionFilters,
   TransactionList,
   TransactionTable
 } from '@/components/pages/transactions';
+import FloatingActionButton from '@/components/layout/FloatingActionButton';
+import { useBudgetContext } from '@/contexts/BudgetContext';
+import { useTransactionContext } from '@/contexts/TransactionContext';
+import { useAccountContext } from '@/contexts/AccountContext';
 
-const mockAccounts: Account[] = [
-  {
-    id: '1',
-    name: 'Konto główne',
-    type: 'checking',
-    balance: 3350,
-    color: '#3b82f6',
-  },
-  {
-    id: '2',
-    name: 'Oszczędności',
-    type: 'savings',
-    balance: 15000,
-    color: '#10b981',
-  },
-  {
-    id: '3',
-    name: 'Karta kredytowa',
-    type: 'credit',
-    balance: -1200,
-    color: '#ef4444',
-  },
-  {
-    id: '4',
-    name: 'Inwestycje',
-    type: 'investment',
-    balance: 25000,
-    color: '#8b5cf6',
-  },
-];
-
-const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    amount: 5000,
-    type: 'income',
-    category: 'Wynagrodzenie',
-    description: 'Wypłata',
-    date: new Date('2024-01-15'),
-    accountId: '1',
-  },
-  {
-    id: '2',
-    amount: 1200,
-    type: 'expense',
-    category: 'Czynsz',
-    description: 'Opłata za mieszkanie',
-    date: new Date('2024-01-10'),
-    accountId: '1',
-  },
-  {
-    id: '3',
-    amount: 300,
-    type: 'expense',
-    category: 'Żywność',
-    description: 'Zakupy spożywcze',
-    date: new Date('2024-01-12'),
-    accountId: '1',
-  },
-  {
-    id: '4',
-    amount: 150,
-    type: 'expense',
-    category: 'Transport',
-    description: 'Bilety komunikacji miejskiej',
-    date: new Date('2024-01-14'),
-    accountId: '1',
-  },
-  {
-    id: '5',
-    amount: 200,
-    type: 'expense',
-    category: 'Rozrywka',
-    description: 'Kino',
-    date: new Date('2024-01-13'),
-    accountId: '1',
-  },
-  {
-    id: '6',
-    amount: 1000,
-    type: 'income',
-    category: 'Oszczędności',
-    description: 'Przelew do oszczędności',
-    date: new Date('2024-01-14'),
-    accountId: '2',
-  },
-  {
-    id: '7',
-    amount: 80,
-    type: 'expense',
-    category: 'Zdrowie',
-    description: 'Lekarz',
-    date: new Date('2024-01-11'),
-    accountId: '1',
-  },
-  {
-    id: '8',
-    amount: 250,
-    type: 'expense',
-    category: 'Ubrania',
-    description: 'Zakupy odzieżowe',
-    date: new Date('2024-01-09'),
-    accountId: '1',
-  },
-];
 
 export default function Transactions() {
-  const [transactions] = useState<Transaction[]>(mockTransactions);
-  const [accounts] = useState<Account[]>(mockAccounts);
+  const { state: budgetState } = useBudgetContext();
+  const { state: transactionState, addTransaction, editTransaction } = useTransactionContext();
+  const { state: accountState } = useAccountContext();
+  const accounts = accountState.accounts;
+  
+  const transactions = transactionState.transactions;
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterAccount, setFilterAccount] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const categories = Array.from(new Set(transactions.map(t => t.category)));
@@ -136,6 +52,40 @@ export default function Transactions() {
   const sortedTransactions = filteredTransactions.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const handleAddTransaction = (data: EditTransactionFormData) => {
+    // Find category name from budgetCategoryId
+    const budgetGroup = budgetState.groups.find(g => g.id === data.budgetGroupId);
+    const budgetCategory = budgetGroup?.categories.find(c => c.id === data.budgetCategoryId);
+    const categoryName = budgetCategory?.name || '';
+
+    addTransaction({
+      ...data,
+      category: categoryName,
+      date: data.date instanceof Date ? data.date : new Date(data.date),
+    });
+    setShowAddModal(false);
+  };
+
+  const handleEditTransaction = (id: string, data: EditTransactionFormData) => {
+    // Find category name from budgetCategoryId
+    const budgetGroup = budgetState.groups.find(g => g.id === data.budgetGroupId);
+    const budgetCategory = budgetGroup?.categories.find(c => c.id === data.budgetCategoryId);
+    const categoryName = budgetCategory?.name || '';
+
+    editTransaction(id, {
+      ...data,
+      category: categoryName,
+      date: data.date instanceof Date ? data.date : new Date(data.date),
+    });
+    setShowEditModal(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleTransactionClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setShowEditModal(true);
+  };
 
   return (
     <div className="container mx-auto px-4 ">
@@ -166,21 +116,39 @@ export default function Transactions() {
         <TransactionTable 
           transactions={sortedTransactions}
           accounts={accounts}
+          budgetGroups={budgetState.groups}
+          onEdit={handleEditTransaction}
         />
 
         <TransactionList 
           transactions={sortedTransactions}
           accounts={accounts}
+          onTransactionClick={handleTransactionClick}
         />
 
         <AddTransactionModal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
-          onAdd={() => {
-            // TODO: Implement add transaction functionality
-            setShowAddModal(false);
-          }}
+          onAdd={handleAddTransaction}
+          accounts={accounts}
+          budgetGroups={budgetState.groups}
         />
+
+        {selectedTransaction && (
+          <EditTransactionModal
+            transaction={selectedTransaction}
+            isOpen={showEditModal}
+            onClose={() => {
+              setShowEditModal(false);
+              setSelectedTransaction(null);
+            }}
+            onSave={handleEditTransaction}
+            accounts={accounts}
+            budgetGroups={budgetState.groups}
+          />
+        )}
+
+        <FloatingActionButton onClick={() => setShowAddModal(true)} />
       </div>
     </div>
   );

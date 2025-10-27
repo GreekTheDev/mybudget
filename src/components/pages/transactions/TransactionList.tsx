@@ -6,9 +6,10 @@ interface TransactionListProps {
   transactions: Transaction[];
   accounts: Account[];
   className?: string;
+  onTransactionClick?: (transaction: Transaction) => void;
 }
 
-export function TransactionList({ transactions, accounts, className = "" }: TransactionListProps) {
+export function TransactionList({ transactions, accounts, className = "", onTransactionClick }: TransactionListProps) {
   // Group transactions by date
   const groupedTransactions = transactions.reduce((groups, transaction) => {
     const date = new Date(transaction.date).toLocaleDateString('pl-PL', {
@@ -49,6 +50,7 @@ export function TransactionList({ transactions, accounts, className = "" }: Tran
                     key={transaction.id}
                     transaction={transaction}
                     account={account}
+                    onClick={() => onTransactionClick?.(transaction)}
                   />
                 );
               })}
