@@ -6,6 +6,18 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const updateSession = async (request: NextRequest) => {
+  // Validate environment variables
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase environment variables');
+    // Allow request to proceed without auth for now to avoid 500
+    const isAuthPage = request.nextUrl.pathname.startsWith('/auth');
+    if (!isAuthPage) {
+      const redirectUrl = new URL('/auth/login', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+    return NextResponse.next();
+  }
+
   // Create an unmodified response
   let supabaseResponse = NextResponse.next({
     request: {
@@ -14,8 +26,8 @@ export const updateSession = async (request: NextRequest) => {
   });
 
   const supabase = createServerClient<Database>(
-    supabaseUrl!,
-    supabaseKey!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
