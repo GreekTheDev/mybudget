@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import { CashFlowData, CashFlowPeriod, CashFlowProjection } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';

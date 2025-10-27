@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 export default function Dashboard() {
   return (
     <div className="container mx-auto px-4 pb-4">
